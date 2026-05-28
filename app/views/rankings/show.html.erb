@@ -1,0 +1,26 @@
+<h1>Ranking geral</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Participante</th>
+      <th>Pontos</th>
+      <th>ADcoins</th>
+      <th>Placares exatos</th>
+      <th>Resultados corretos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each_with_index do |user, index| %>
+      <tr>
+        <td><%= index + 1 %></td>
+        <td><%= user.name %></td>
+        <td><%= user.total_points %></td>
+        <td><%= user.adcoins_balance %></td>
+        <td><%= user.exact_hits %></td>
+        <td><%= user.result_hits %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

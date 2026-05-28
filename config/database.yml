@@ -1,0 +1,16 @@
+default: &default
+  adapter: sqlite3
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  timeout: 5000
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("BOLAOADS_DEVELOPMENT_DATABASE", "C:/Users/leogo/AppData/Local/BolaoADS/development.sqlite3") %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("BOLAOADS_TEST_DATABASE", "C:/Users/leogo/AppData/Local/BolaoADS/test.sqlite3") %>
+
+production:
+  <<: *default
+  database: storage/production.sqlite3

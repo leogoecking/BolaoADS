@@ -1,0 +1,6 @@
+pt-BR:
+  hello: "Ola"
+  time:
+    formats:
+      short: "%d/%m/%Y %H:%M"
+      long: "%d/%m/%Y %H:%M"

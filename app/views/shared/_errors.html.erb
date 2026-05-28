@@ -1,0 +1,10 @@
+<% if object.errors.any? %>
+  <div class="flash alert">
+    <strong>Revise os campos:</strong>
+    <ul>
+      <% object.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

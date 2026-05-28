@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+system("bundle install") || abort("bundle install failed")
+system("bin/rails db:prepare") || abort("db prepare failed")

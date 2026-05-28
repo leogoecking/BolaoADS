@@ -1,0 +1,39 @@
+<div class="actions">
+  <h1>Jogos</h1>
+  <% if current_user.admin? %>
+    <%= button_to "Sincronizar placares", admin_sync_path, method: :post %>
+  <% end %>
+</div>
+
+<% if @matches.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Partida</th>
+        <th>Data</th>
+        <th>Status</th>
+        <th>Placar</th>
+        <th>Seu palpite</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @matches.each do |match| %>
+        <% prediction = @predictions_by_match_id[match.id] %>
+        <tr>
+          <td><%= match.home_team.name %> x <%= match.away_team.name %></td>
+          <td><%= l(match.kickoff_at, format: :short) %></td>
+          <td><%= match.status %></td>
+          <td><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></td>
+          <td><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></td>
+          <td><%= link_to match.open_for_predictions? ? "Palpitar" : "Ver", match_path(match) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="panel">
+    <p>Nenhum jogo cadastrado ainda.</p>
+    <p class="muted">Configure a API e use a sincronizacao, ou cadastre dados via console Rails durante o desenvolvimento.</p>
+  </div>
+<% end %>

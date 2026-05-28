@@ -1,0 +1,75 @@
+<div class="panel">
+  <p><%= link_to "Voltar aos jogos", matches_path %></p>
+  <h1><%= @match.home_team.name %> x <%= @match.away_team.name %></h1>
+  <p class="muted">
+    Inicio: <%= l(@match.kickoff_at, format: :long) %>.
+    Palpites ate: <%= l(@match.prediction_deadline, format: :long) %>.
+  </p>
+
+  <p>Status: <strong><%= @match.status %></strong></p>
+  <p>Placar atual: <strong><%= @match.home_score.nil? ? "-" : "#{@match.home_score} x #{@match.away_score}" %></strong></p>
+  <p>Saldo: <strong><%= current_user.adcoins_balance %> ADcoins</strong></p>
+
+  <%= render "shared/errors", object: @prediction %>
+
+  <% if @match.open_for_predictions? %>
+    <%= form_with model: [@match, @prediction], url: match_prediction_path(@match), method: (@prediction.persisted? ? :patch : :post) do |form| %>
+      <div class="score-inputs">
+        <div>
+          <%= form.label :home_score, @match.home_team.name %>
+          <%= form.number_field :home_score, min: 0, required: true %>
+        </div>
+        <div>
+          <%= form.label :away_score, @match.away_team.name %>
+          <%= form.number_field :away_score, min: 0, required: true %>
+        </div>
+        <div>
+          <%= form.label :adcoins_wager, "ADcoins" %>
+          <%= form.number_field :adcoins_wager, min: 0, max: current_user.adcoins_balance + @prediction.adcoins_wager.to_i, required: true %>
+        </div>
+        <%= form.submit "Salvar palpite", class: "button" %>
+      </div>
+    <% end %>
+  <% elsif @prediction.persisted? %>
+    <p>Seu palpite: <strong><%= @prediction.home_score %> x <%= @prediction.away_score %></strong></p>
+    <p>ADcoins investidos: <strong><%= @prediction.adcoins_wager %></strong></p>
+    <p class="muted">Edicao encerrada para esta partida.</p>
+  <% else %>
+    <p class="muted">Palpites encerrados para esta partida.</p>
+  <% end %>
+</div>
+
+<% if @match.predictions_revealed? %>
+  <div class="panel" style="margin-top: 16px;">
+    <h2>Palpites revelados</h2>
+    <% if @revealed_predictions.any? %>
+      <table>
+        <thead>
+          <tr>
+            <th>Participante</th>
+            <th>Palpite</th>
+            <th>ADcoins</th>
+            <th>Pontos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @revealed_predictions.each do |prediction| %>
+            <tr>
+              <td><%= prediction.user.name %></td>
+              <td><%= prediction.home_score %> x <%= prediction.away_score %></td>
+              <td><%= prediction.adcoins_wager %></td>
+              <td><%= prediction.points %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="muted">Ninguem palpitou nesta partida.</p>
+    <% end %>
+  </div>
+<% else %>
+  <div class="panel" style="margin-top: 16px;">
+    <h2>Palpites secretos</h2>
+    <p class="muted">Os palpites dos outros participantes ficam ocultos ate o inicio da partida.</p>
+  </div>
+<% end %>

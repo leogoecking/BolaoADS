@@ -1,0 +1,40 @@
+<h1>Palpites especiais</h1>
+
+<div class="panel">
+  <p class="muted">Esses palpites fecham antes da Copa e serao apurados em uma fase futura.</p>
+</div>
+
+<% @questions.each do |question| %>
+  <% prediction = @predictions_by_question_id[question.id] || current_user.special_predictions.new(special_question: question) %>
+  <div class="panel" style="margin-top: 16px;">
+    <h2><%= question.prompt %></h2>
+    <p class="muted">
+      Vale <%= question.points_value %> pontos futuros.
+      Fecha em <%= l(question.closes_at, format: :short) %>.
+    </p>
+
+    <% if prediction.errors.any? %>
+      <%= render "shared/errors", object: prediction %>
+    <% end %>
+
+    <% if question.open? %>
+      <%= form_with model: prediction, url: prediction.persisted? ? special_prediction_path(prediction) : special_predictions_path, method: prediction.persisted? ? :patch : :post do |form| %>
+        <%= hidden_field_tag :special_question_id, question.id %>
+        <%= form.label :answer, "Resposta" %>
+        <% if question.answer_type == "number" %>
+          <%= form.number_field :answer, required: true %>
+        <% elsif question.answer_type == "boolean" %>
+          <%= form.select :answer, [["Sim", "sim"], ["Nao", "nao"]], {}, required: true %>
+        <% else %>
+          <%= form.text_field :answer, required: true %>
+        <% end %>
+        <p><%= form.submit "Salvar", class: "button" %></p>
+      <% end %>
+    <% elsif prediction.persisted? %>
+      <p>Sua resposta: <strong><%= prediction.answer %></strong></p>
+      <p class="muted">Edicao encerrada.</p>
+    <% else %>
+      <p class="muted">Palpite encerrado sem resposta.</p>
+    <% end %>
+  </div>
+<% end %>

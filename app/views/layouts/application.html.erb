@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <title>BolaoADS</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; color: #1f2937; background: #f6f7f9; }
+      header { background: #0f766e; color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      header a, header button { color: white; }
+      nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+      main { max-width: 1040px; margin: 0 auto; padding: 24px; }
+      a { color: #0f766e; text-decoration: none; font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+      th, td { padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      th { background: #eef2f7; }
+      .panel { background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; }
+      .flash { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; background: #ecfdf5; border: 1px solid #a7f3d0; }
+      .alert { background: #fef2f2; border-color: #fecaca; }
+      .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+      input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+      label { display: block; font-weight: 700; margin: 12px 0 6px; }
+      button, .button { background: #0f766e; border: 0; color: white; border-radius: 6px; padding: 10px 14px; cursor: pointer; font-weight: 700; }
+      .muted { color: #64748b; font-size: 0.94rem; }
+      .score-inputs { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+      .error { color: #b91c1c; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>BolaoADS</strong>
+      <nav>
+        <% if signed_in? %>
+          <%= link_to "Jogos", matches_path %>
+          <%= link_to "Ranking", ranking_path %>
+          <%= link_to "Especiais", special_predictions_path %>
+          <%= link_to "Conquistas", achievements_path %>
+          <span><%= current_user.adcoins_balance %> ADcoins</span>
+          <span><%= current_user.name %></span>
+          <%= button_to "Sair", session_path, method: :delete %>
+        <% else %>
+          <%= link_to "Entrar", new_session_path %>
+          <%= link_to "Cadastrar", new_registration_path %>
+        <% end %>
+      </nav>
+    </header>
+    <main>
+      <% if notice.present? %><div class="flash"><%= notice %></div><% end %>
+      <% if alert.present? %><div class="flash alert"><%= alert %></div><% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>

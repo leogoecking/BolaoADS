@@ -1,0 +1,5 @@
+class AddAdcoinsPayoutToPredictions < ActiveRecord::Migration[8.0]
+  def change
+    add_column :predictions, :adcoins_payout, :integer, null: false, default: 0
+  end
+end

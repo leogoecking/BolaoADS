@@ -1,0 +1,31 @@
+<h1>Conquistas</h1>
+
+<div class="panel">
+  <p class="muted">Conquistas sao badges decorativas e nao alteram a pontuacao do ranking.</p>
+</div>
+
+<table style="margin-top: 16px;">
+  <thead>
+    <tr>
+      <th>Conquista</th>
+      <th>Como ganha</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @achievements.each do |achievement| %>
+      <% unlocked = @unlocked_by_key[achievement.key] %>
+      <tr>
+        <td><strong><%= achievement.name %></strong></td>
+        <td><%= achievement.description %></td>
+        <td>
+          <% if unlocked %>
+            Liberada em <%= l(unlocked.unlocked_at, format: :short) %>
+          <% else %>
+            Bloqueada
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

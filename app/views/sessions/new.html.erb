@@ -1,0 +1,13 @@
+<div class="panel">
+  <h1>Entrar</h1>
+
+  <%= form_with url: session_path do |form| %>
+    <%= form.label :email, "Email" %>
+    <%= form.email_field :email, required: true %>
+
+    <%= form.label :password, "Senha" %>
+    <%= form.password_field :password, required: true %>
+
+    <p><%= form.submit "Entrar", class: "button" %></p>
+  <% end %>
+</div>
