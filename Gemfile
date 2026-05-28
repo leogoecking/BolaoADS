@@ -6,6 +6,8 @@ gem "rails", "~> 8.0.0"
 gem "sqlite3", ">= 2.1"
 gem "puma", ">= 6.0"
 gem "bcrypt", "~> 3.1"
+gem "propshaft"
+gem "tailwindcss-rails", "~> 4.3"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 group :test do

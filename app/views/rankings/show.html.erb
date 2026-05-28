@@ -1,26 +1,42 @@
-<h1>Ranking geral</h1>
+<div class="actions">
+  <div>
+    <p class="page-kicker">🏆 Disputa geral</p>
+    <h1 class="page-title">Ranking da zoeira</h1>
+  </div>
+</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Participante</th>
-      <th>Pontos</th>
-      <th>ADcoins</th>
-      <th>Placares exatos</th>
-      <th>Resultados corretos</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @users.each_with_index do |user, index| %>
+<div class="hype-card mb-4">
+  <p class="text-lg font-black text-slate-950">Aqui nao tem amizade: quem pontua sobe, quem erra vira pauta. 🔥</p>
+  <p class="muted">Placares exatos dao moral. Resultado certo evita passar vergonha.</p>
+</div>
+
+<div class="table-shell overflow-x-auto">
+  <table class="data-table">
+    <thead>
       <tr>
-        <td><%= index + 1 %></td>
-        <td><%= user.name %></td>
-        <td><%= user.total_points %></td>
-        <td><%= user.adcoins_balance %></td>
-        <td><%= user.exact_hits %></td>
-        <td><%= user.result_hits %></td>
+        <th>Posicao</th>
+        <th>Participante</th>
+        <th>Pontos</th>
+        <th>ADcoins</th>
+        <th>Na gaveta</th>
+        <th>Acertou o rumo</th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @users.each_with_index do |user, index| %>
+        <tr>
+          <td>
+            <span class="<%= index < 3 ? "medal-pill" : "score-pill" %>">
+              <%= ["🥇", "🥈", "🥉"][index] || "##{index + 1}" %>
+            </span>
+          </td>
+          <td class="font-black text-slate-950"><%= user.name %> <%= index.zero? ? "👑" : "" %></td>
+          <td class="font-black text-emerald-800"><%= user.total_points %> pts</td>
+          <td class="font-bold text-amber-700"><%= user.adcoins_balance %> 🪙</td>
+          <td><%= user.exact_hits %> 🎯</td>
+          <td><%= user.result_hits %> ✅</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

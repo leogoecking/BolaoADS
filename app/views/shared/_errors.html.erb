@@ -1,7 +1,7 @@
 <% if object.errors.any? %>
-  <div class="flash alert">
-    <strong>Revise os campos:</strong>
-    <ul>
+  <div class="flash alert mt-4">
+    <strong>Deu ruim na jogada 😬 Revise os campos:</strong>
+    <ul class="mt-2 list-disc pl-5">
       <% object.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>

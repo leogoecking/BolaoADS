@@ -1,21 +1,24 @@
-<div class="panel">
-  <h1>Criar conta</h1>
+<div class="mx-auto max-w-md">
+  <div class="panel">
+    <p class="page-kicker">🔥 Novo participante</p>
+    <h1 class="page-title">Chegar no bolao</h1>
 
-  <%= render "shared/errors", object: @user %>
+    <%= render "shared/errors", object: @user %>
 
-  <%= form_with model: @user, url: registration_path do |form| %>
-    <%= form.label :name, "Nome" %>
-    <%= form.text_field :name, required: true %>
+    <%= form_with model: @user, url: registration_path do |form| %>
+      <%= form.label :name, "Nome" %>
+      <%= form.text_field :name, required: true %>
 
-    <%= form.label :email, "Email" %>
-    <%= form.email_field :email, required: true %>
+      <%= form.label :email, "Email" %>
+      <%= form.email_field :email, required: true %>
 
-    <%= form.label :password, "Senha" %>
-    <%= form.password_field :password, required: true %>
+      <%= form.label :password, "Senha" %>
+      <%= form.password_field :password, required: true %>
 
-    <%= form.label :password_confirmation, "Confirme a senha" %>
-    <%= form.password_field :password_confirmation, required: true %>
+      <%= form.label :password_confirmation, "Confirme a senha" %>
+      <%= form.password_field :password_confirmation, required: true %>
 
-    <p><%= form.submit "Cadastrar", class: "button" %></p>
-  <% end %>
+      <p class="mt-5"><%= form.submit "Cadastrar e cornetar 😎" %></p>
+    <% end %>
+  </div>
 </div>

@@ -1,13 +1,16 @@
-<div class="panel">
-  <h1>Entrar</h1>
+<div class="mx-auto max-w-md">
+  <div class="panel">
+    <p class="page-kicker">👀 Acesso</p>
+    <h1 class="page-title">Entrar na resenha</h1>
 
-  <%= form_with url: session_path do |form| %>
-    <%= form.label :email, "Email" %>
-    <%= form.email_field :email, required: true %>
+    <%= form_with url: session_path do |form| %>
+      <%= form.label :email, "Email" %>
+      <%= form.email_field :email, required: true %>
 
-    <%= form.label :password, "Senha" %>
-    <%= form.password_field :password, required: true %>
+      <%= form.label :password, "Senha" %>
+      <%= form.password_field :password, required: true %>
 
-    <p><%= form.submit "Entrar", class: "button" %></p>
-  <% end %>
+      <p class="mt-5"><%= form.submit "Entrar e palpitar 🚀" %></p>
+    <% end %>
+  </div>
 </div>

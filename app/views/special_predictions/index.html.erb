@@ -1,17 +1,28 @@
-<h1>Palpites especiais</h1>
+<div class="actions">
+  <div>
+    <p class="page-kicker">🔮 Antes da Copa</p>
+    <h1 class="page-title">Profecias da resenha</h1>
+  </div>
+</div>
 
-<div class="panel">
+<div class="hype-card">
+  <p class="font-black text-slate-950">Aqui e pra quem fala com conviccao antes de todo mundo. Depois nao vale editar a historia. 😎</p>
   <p class="muted">Esses palpites fecham antes da Copa e serao apurados em uma fase futura.</p>
 </div>
 
 <% @questions.each do |question| %>
   <% prediction = @predictions_by_question_id[question.id] || current_user.special_predictions.new(special_question: question) %>
-  <div class="panel" style="margin-top: 16px;">
-    <h2><%= question.prompt %></h2>
-    <p class="muted">
-      Vale <%= question.points_value %> pontos futuros.
-      Fecha em <%= l(question.closes_at, format: :short) %>.
-    </p>
+  <div class="panel mt-4">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h2 class="text-xl font-black text-slate-950">🔮 <%= question.prompt %></h2>
+        <p class="muted">
+          Vale <%= question.points_value %> pontos futuros.
+          Fecha em <%= l(question.closes_at, format: :short) %>.
+        </p>
+      </div>
+      <span class="status-pill <%= question.open? ? "status-open" : "status-closed" %>"><%= question.open? ? "Aberto pra ousar 🔥" : "Fechado 😬" %></span>
+    </div>
 
     <% if prediction.errors.any? %>
       <%= render "shared/errors", object: prediction %>
@@ -20,7 +31,7 @@
     <% if question.open? %>
       <%= form_with model: prediction, url: prediction.persisted? ? special_prediction_path(prediction) : special_predictions_path, method: prediction.persisted? ? :patch : :post do |form| %>
         <%= hidden_field_tag :special_question_id, question.id %>
-        <%= form.label :answer, "Resposta" %>
+        <%= form.label :answer, "Manda a profecia" %>
         <% if question.answer_type == "number" %>
           <%= form.number_field :answer, required: true %>
         <% elsif question.answer_type == "boolean" %>
@@ -28,13 +39,13 @@
         <% else %>
           <%= form.text_field :answer, required: true %>
         <% end %>
-        <p><%= form.submit "Salvar", class: "button" %></p>
+        <p class="mt-4"><%= form.submit "Salvar profecia 🚀" %></p>
       <% end %>
     <% elsif prediction.persisted? %>
-      <p>Sua resposta: <strong><%= prediction.answer %></strong></p>
-      <p class="muted">Edicao encerrada.</p>
+      <p class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">Sua resposta ficou cravada: <strong><%= prediction.answer %> 🎯</strong></p>
+      <p class="muted">Edicao encerrada. Agora segura a call.</p>
     <% else %>
-      <p class="muted">Palpite encerrado sem resposta.</p>
+      <p class="muted">Palpite encerrado sem resposta. Perdeu o bonde da resenha.</p>
     <% end %>
   </div>
 <% end %>

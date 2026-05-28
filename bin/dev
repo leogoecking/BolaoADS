@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+require "socket"
+
+APP_ROOT = File.expand_path("..", __dir__)
+DEFAULT_HOST = ENV.fetch("HOST", "0.0.0.0")
+DEFAULT_PORT = Integer(ENV.fetch("PORT", "3000"))
+PID_PATH = File.join(APP_ROOT, "tmp", "pids", "server.pid")
+
+def available_port(host, start_port)
+  port = start_port
+
+  loop do
+    TCPServer.open(host, port) do |server|
+      server.close
+      return port
+    end
+  rescue Errno::EADDRINUSE, Errno::EACCES
+    port += 1
+  end
+end
+
+def process_running?(pid)
+  Process.kill(0, pid)
+  true
+rescue Errno::ESRCH
+  false
+rescue Errno::EPERM
+  true
+end
+
+def local_network_host
+  Socket.ip_address_list.find { |address| address.ipv4_private? }&.ip_address || "127.0.0.1"
+end
+
+if File.exist?(PID_PATH)
+  pid = File.read(PID_PATH).to_i
+
+  if pid.positive? && process_running?(pid)
+    puts "BolaoADS ja esta rodando localmente (pid #{pid})."
+    puts "Pare esse processo antes de iniciar outra instancia."
+    exit 0
+  end
+
+  File.delete(PID_PATH)
+end
+
+port = available_port(DEFAULT_HOST, DEFAULT_PORT)
+network_host = ENV.fetch("PUBLIC_HOST", local_network_host)
+
+ENV["BOLAOADS_DEVELOPMENT_DATABASE"] ||= File.join(APP_ROOT, "db", "development.sqlite3")
+ENV["BOLAOADS_TEST_DATABASE"] ||= File.join(APP_ROOT, "db", "test.sqlite3")
+
+puts "BolaoADS rodando localmente em http://127.0.0.1:#{port}"
+puts "Acesso na rede local em http://#{network_host}:#{port}"
+puts "Use Ctrl+C para parar o servidor."
+
+Dir.chdir(APP_ROOT) do
+  ARGV.replace(["server", "-b", DEFAULT_HOST, "-p", port.to_s])
+  load File.join(APP_ROOT, "bin", "rails")
+end
