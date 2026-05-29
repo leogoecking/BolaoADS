@@ -1,0 +1,20 @@
+<div class="actions">
+  <div>
+    <p class="page-kicker">Classificação</p>
+    <h1 class="page-title">Fase de grupos</h1>
+  </div>
+  <%= link_to "Ver calendário", calendar_matches_path, class: "button-secondary" %>
+</div>
+
+<% if @group_standings.any? %>
+  <div class="groups-grid">
+    <% @group_standings.each do |group_name, rows| %>
+      <%= render "group_table", group_name: group_name, rows: rows %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="panel-muted">
+    <p class="font-black text-slate-900">Tabela indisponível no momento.</p>
+    <p class="muted">Os jogos continuam disponíveis no calendário; tente sincronizar novamente mais tarde.</p>
+  </div>
+<% end %>

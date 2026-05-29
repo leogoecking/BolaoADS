@@ -1,11 +1,16 @@
 <div class="actions">
   <div>
     <p class="page-kicker">Copa do Mundo 2026</p>
-    <h1 class="page-title">Jogos e grupos</h1>
+    <h1 class="page-title">Jogos em destaque</h1>
   </div>
   <% if current_user.admin? %>
     <%= button_to "Sincronizar placares", admin_sync_path, method: :post %>
   <% end %>
+</div>
+
+<div class="quick-nav">
+  <%= link_to "📅 Calendário completo", calendar_matches_path, class: "button-secondary" %>
+  <%= link_to "📊 Fase de grupos", groups_matches_path, class: "button-secondary" %>
 </div>
 
 <% if @matches.any? %>
@@ -21,33 +26,13 @@
     <% if @today_matches.any? %>
       <div class="match-grid">
         <% @today_matches.each do |match| %>
-          <% prediction = @predictions_by_match_id[match.id] %>
-          <%= link_to match_path(match), class: "match-card" do %>
-            <div class="match-meta">
-              <span><%= l(match.kickoff_at, format: :short) %></span>
-              <span class="status-pill <%= match.open_for_predictions? ? "status-open" : "status-closed" %>"><%= match.open_for_predictions? ? "Aberto" : match.status %></span>
-            </div>
-            <div class="team-row">
-              <%= image_tag team_logo_url(match.home_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.home_team) %>
-              <span class="team-fallback"><%= team_initials(match.home_team) %></span>
-              <strong><%= match.home_team.name %></strong>
-            </div>
-            <div class="team-row">
-              <%= image_tag team_logo_url(match.away_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.away_team) %>
-              <span class="team-fallback"><%= team_initials(match.away_team) %></span>
-              <strong><%= match.away_team.name %></strong>
-            </div>
-            <div class="match-footer">
-              <span class="score-pill"><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></span>
-              <span><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></span>
-            </div>
-          <% end %>
+          <%= render "match_card", match: match, prediction: @predictions_by_match_id[match.id] %>
         <% end %>
       </div>
     <% else %>
       <div class="panel-muted">
         <p class="font-black text-slate-900">Nenhum jogo marcado para hoje.</p>
-        <p class="muted">Os próximos confrontos aparecem logo abaixo.</p>
+        <p class="muted">Os próximos confrontos em destaque aparecem logo abaixo.</p>
       </div>
     <% end %>
   </section>
@@ -58,129 +43,25 @@
         <p class="page-kicker">Agenda</p>
         <h2>Próximos jogos</h2>
       </div>
-      <span class="count-pill"><%= @upcoming_matches_by_date.values.sum(&:size) %></span>
+      <span class="count-pill"><%= @highlight_matches.size %></span>
     </div>
 
-    <% @upcoming_matches_by_date.each do |date, matches| %>
-      <div class="date-band">
-        <h3><%= l(date, format: "%d/%m/%Y") %></h3>
-        <div class="table-shell overflow-x-auto">
-          <table class="data-table compact-table">
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>Partida</th>
-                <th>Grupo</th>
-                <th>Placar</th>
-                <th>Seu palpite</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <% matches.each do |match| %>
-                <% prediction = @predictions_by_match_id[match.id] %>
-                <tr>
-                  <td class="font-black text-slate-700"><%= l(match.kickoff_at, format: "%H:%M") %></td>
-                  <td>
-                    <div class="versus-line">
-                      <span class="team-inline">
-                        <%= image_tag team_logo_url(match.home_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.home_team) %>
-                        <%= match.home_team.name %>
-                      </span>
-                      <span class="muted">x</span>
-                      <span class="team-inline">
-                        <%= image_tag team_logo_url(match.away_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.away_team) %>
-                        <%= match.away_team.name %>
-                      </span>
-                    </div>
-                  </td>
-                  <td><span class="group-pill"><%= match.group_name.presence || "Mata-mata" %></span></td>
-                  <td><span class="score-pill"><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></span></td>
-                  <td class="font-bold text-slate-700"><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></td>
-                  <td class="text-right"><%= link_to match.open_for_predictions? ? "Palpitar" : "Ver jogo", match_path(match), class: "button" %></td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    <% end %>
-  </section>
-
-  <section class="match-section">
-    <div class="section-heading">
-      <div>
-        <p class="page-kicker">Classificação</p>
-        <h2>Tabela de grupos</h2>
-      </div>
-    </div>
-
-    <% if @group_standings.any? %>
-      <div class="groups-grid">
-        <% @group_standings.each do |group_name, rows| %>
-          <div class="group-card">
-            <h3><%= group_name %></h3>
-            <table class="group-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Seleção</th>
-                  <th>J</th>
-                  <th>SG</th>
-                  <th>Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% rows.each do |row| %>
-                  <tr>
-                    <td><%= row[:position] %></td>
-                    <td>
-                      <span class="team-inline">
-                        <%= image_tag bsd_team_logo_url(row[:team_id]), class: "team-logo small", alt: "", onerror: "this.style.display='none'" %>
-                        <%= row[:team_name] %>
-                      </span>
-                    </td>
-                    <td><%= row[:played] %></td>
-                    <td><%= row[:goal_difference] %></td>
-                    <td class="font-black text-slate-950"><%= row[:points] %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+    <% if @highlight_matches.any? %>
+      <div class="match-grid">
+        <% @highlight_matches.each do |match| %>
+          <%= render "match_card", match: match, prediction: @predictions_by_match_id[match.id] %>
         <% end %>
+      </div>
+      <div class="section-actions">
+        <%= link_to "📅 Ver calendário completo", calendar_matches_path, class: "button" %>
       </div>
     <% else %>
       <div class="panel-muted">
-        <p class="font-black text-slate-900">Tabela indisponível no momento.</p>
-        <p class="muted">Os jogos continuam disponíveis; tente sincronizar novamente mais tarde.</p>
+        <p class="font-black text-slate-900">Não há próximos jogos cadastrados.</p>
+        <p class="muted">Use a sincronização para atualizar a agenda.</p>
       </div>
     <% end %>
   </section>
-
-  <% if @past_matches.any? %>
-    <section class="match-section">
-      <div class="section-heading">
-        <div>
-          <p class="page-kicker">Arquivo</p>
-          <h2>Jogos anteriores</h2>
-        </div>
-        <span class="count-pill"><%= @past_matches.size %></span>
-      </div>
-      <div class="match-grid">
-        <% @past_matches.first(12).each do |match| %>
-          <%= link_to match_path(match), class: "match-card muted-card" do %>
-            <div class="match-meta">
-              <span><%= l(match.kickoff_at, format: :short) %></span>
-              <span class="status-pill status-closed"><%= match.status %></span>
-            </div>
-            <strong><%= match.home_team.name %> x <%= match.away_team.name %></strong>
-            <span class="score-pill"><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></span>
-          <% end %>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
 <% else %>
   <div class="panel-muted">
     <p class="font-black text-slate-900">Nenhum jogo cadastrado ainda.</p>

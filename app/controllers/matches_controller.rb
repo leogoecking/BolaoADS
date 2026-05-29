@@ -4,12 +4,19 @@ class MatchesController < ApplicationController
   def index
     @matches = Match.ordered.to_a
     @today_matches = @matches.select { |match| match.kickoff_at.to_date == Date.current }
-    @upcoming_matches_by_date = @matches
+    @highlight_matches = @matches
       .select { |match| match.kickoff_at.to_date > Date.current }
-      .group_by { |match| match.kickoff_at.to_date }
-    @past_matches = @matches.select { |match| match.kickoff_at.to_date < Date.current }.reverse
-    @group_standings = Football::GroupStandings.new.call
+      .first(6)
     @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
+  end
+
+  def calendar
+    @matches_by_group = Match.ordered.to_a.group_by { |match| match.group_name.presence || "Mata-mata" }
+    @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
+  end
+
+  def groups
+    @group_standings = Football::GroupStandings.new.call
   end
 
   def show

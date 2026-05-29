@@ -5,6 +5,11 @@ Rails.application.routes.draw do
   resource :session, only: %i[new create destroy]
 
   resources :matches, only: %i[index show] do
+    collection do
+      get :calendar
+      get :groups
+    end
+
     resource :prediction, only: %i[create update]
   end
 

@@ -1,0 +1,30 @@
+<div class="group-card">
+  <h3><%= group_name %></h3>
+  <table class="group-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Seleção</th>
+        <th>J</th>
+        <th>SG</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% rows.each do |row| %>
+        <tr>
+          <td><%= row[:position] %></td>
+          <td>
+            <span class="team-inline">
+              <%= image_tag bsd_team_logo_url(row[:team_id]), class: "team-logo small", alt: "", onerror: "this.style.display='none'" %>
+              <%= row[:team_name] %>
+            </span>
+          </td>
+          <td><%= row[:played] %></td>
+          <td><%= row[:goal_difference] %></td>
+          <td class="font-black text-slate-950"><%= row[:points] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

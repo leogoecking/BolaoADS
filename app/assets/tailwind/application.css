@@ -33,7 +33,7 @@
   }
 
   .topbar-inner {
-    @apply mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8;
+    @apply mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 xl:flex-row xl:items-start xl:justify-between xl:px-8;
   }
 
   .brand-lockup {
@@ -45,19 +45,35 @@
   }
 
   .nav-list {
-    @apply flex flex-wrap items-center gap-2;
+    @apply flex flex-wrap items-center gap-1.5;
+  }
+
+  .topbar-menu {
+    @apply flex min-w-0 flex-col gap-2 xl:items-end;
   }
 
   .nav-link {
-    @apply rounded-md px-3 py-2 text-sm font-bold text-emerald-50 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-white;
+    @apply rounded-md px-2.5 py-1.5 text-sm font-bold text-emerald-50 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-white;
+  }
+
+  .account-bar {
+    @apply flex max-w-full flex-wrap items-center justify-start gap-2 xl:justify-end;
   }
 
   .user-chip {
-    @apply inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/10 px-3 py-2 text-sm font-bold text-white shadow-sm;
+    @apply inline-flex max-w-44 items-center gap-1.5 truncate rounded-md border border-white/15 bg-white/10 px-2.5 py-1.5 text-xs font-bold text-white shadow-sm;
   }
 
   .coin-chip {
-    @apply inline-flex animate-pulse items-center rounded-md bg-amber-300 px-3 py-2 text-sm font-black text-emerald-950 shadow-lg shadow-amber-300/30;
+    @apply inline-flex animate-pulse items-center rounded-md bg-amber-300 px-2.5 py-1.5 text-xs font-black text-emerald-950 shadow-lg shadow-amber-300/30;
+  }
+
+  .logout-form {
+    @apply inline-flex;
+  }
+
+  .topbar-logout {
+    @apply inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-white/20 bg-white/10 p-0 text-base font-black leading-none text-white shadow-none transition hover:-translate-y-0.5 hover:border-amber-300/70 hover:bg-white/20 hover:text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400;
   }
 
   .page-wrap {
@@ -90,6 +106,15 @@
 
   .actions {
     @apply mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .quick-nav,
+  .section-actions {
+    @apply mb-5 flex flex-wrap items-center gap-2;
+  }
+
+  .section-actions {
+    @apply mt-4 justify-end;
   }
 
   .button,

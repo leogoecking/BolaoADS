@@ -1,0 +1,22 @@
+<% prediction = local_assigns[:prediction] %>
+
+<%= link_to match_path(match), class: "match-card" do %>
+  <div class="match-meta">
+    <span><%= l(match.kickoff_at, format: :short) %></span>
+    <span class="status-pill <%= match.open_for_predictions? ? "status-open" : "status-closed" %>"><%= match.open_for_predictions? ? "Aberto" : match.status %></span>
+  </div>
+  <div class="team-row">
+    <%= image_tag team_logo_url(match.home_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.home_team) %>
+    <span class="team-fallback"><%= team_initials(match.home_team) %></span>
+    <strong><%= match.home_team.name %></strong>
+  </div>
+  <div class="team-row">
+    <%= image_tag team_logo_url(match.away_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.away_team) %>
+    <span class="team-fallback"><%= team_initials(match.away_team) %></span>
+    <strong><%= match.away_team.name %></strong>
+  </div>
+  <div class="match-footer">
+    <span class="score-pill"><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></span>
+    <span><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></span>
+  </div>
+<% end %>

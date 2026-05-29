@@ -18,20 +18,28 @@
           </span>
         <% end %>
 
-        <nav class="nav-list">
-          <% if signed_in? %>
-            <%= link_to "⚽ Jogos", matches_path, class: "nav-link" %>
-            <%= link_to "🏆 Ranking", ranking_path, class: "nav-link" %>
-            <%= link_to "🔮 Especiais", special_predictions_path, class: "nav-link" %>
-            <%= link_to "🔥 Conquistas", achievements_path, class: "nav-link" %>
-            <span class="coin-chip">🪙 <%= current_user.adcoins_balance %> ADcoins</span>
-            <span class="user-chip">😎 <%= current_user.name %></span>
-            <%= button_to "Sair 👋", session_path, method: :delete, class: "border-white/20 bg-white/10 hover:bg-white/20" %>
-          <% else %>
+        <% if signed_in? %>
+          <div class="topbar-menu">
+            <nav class="nav-list">
+              <%= link_to "⚽ Jogos", matches_path, class: "nav-link" %>
+              <%= link_to "📅 Calendário", calendar_matches_path, class: "nav-link" %>
+              <%= link_to "📊 Grupos", groups_matches_path, class: "nav-link" %>
+              <%= link_to "🏆 Ranking", ranking_path, class: "nav-link" %>
+              <%= link_to "🔮 Especiais", special_predictions_path, class: "nav-link" %>
+              <%= link_to "🔥 Conquistas", achievements_path, class: "nav-link" %>
+            </nav>
+            <div class="account-bar">
+              <span class="coin-chip">🪙 <%= current_user.adcoins_balance %> ADcoins</span>
+              <span class="user-chip" title="<%= current_user.name %>">😎 <%= current_user.name %></span>
+              <%= button_to "🚪", session_path, method: :delete, class: "topbar-logout", title: "Sair", aria: { label: "Sair" }, form_class: "logout-form" %>
+            </div>
+          </div>
+        <% else %>
+          <nav class="nav-list">
             <%= link_to "Entrar 👀", new_session_path, class: "nav-link" %>
             <%= link_to "Cadastrar e cornetar 🔥", new_registration_path, class: "button bg-amber-300 text-emerald-950 hover:bg-amber-200" %>
-          <% end %>
-        </nav>
+          </nav>
+        <% end %>
       </div>
     </header>
 
