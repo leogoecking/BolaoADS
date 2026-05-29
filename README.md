@@ -18,12 +18,12 @@ bin/rails db:prepare
 bin/dev
 ```
 
-Copie `.env.example` para `.env` e configure `FOOTBALL_API_KEY` para habilitar sincronizacao com API externa.
+Copie `.env.example` para `.env` e configure `FOOTBALL_API_KEY` com um token do BSD para habilitar sincronizacao com API externa. A configuracao padrao busca jogos da Copa do Mundo 2026 via `https://sports.bzzoiro.com/api/v2/events/?league_id=27&season_id=188&limit=200`.
 
 No Windows, use:
 
 ```powershell
-.\bin\dev.ps1
+powershell.exe -ExecutionPolicy Bypass -File .\bin\dev.ps1
 ```
 
 O comando procura uma porta livre a partir da `3000`, escuta em `0.0.0.0` e imprime:

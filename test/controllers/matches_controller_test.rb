@@ -1,6 +1,22 @@
 require "test_helper"
 
 class MatchesControllerTest < ActionDispatch::IntegrationTest
+  def with_empty_standings
+    original = Football::GroupStandings
+    replacement = Class.new do
+      def call
+        {}
+      end
+    end
+
+    Football.send(:remove_const, :GroupStandings)
+    Football.const_set(:GroupStandings, replacement)
+    yield
+  ensure
+    Football.send(:remove_const, :GroupStandings)
+    Football.const_set(:GroupStandings, original)
+  end
+
   test "redirects unauthenticated user" do
     get matches_path
 
@@ -12,10 +28,26 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     match_record
 
     post session_path, params: { email: player.email, password: "secret123" }
-    get matches_path
+    with_empty_standings { get matches_path }
 
     assert_response :success
     assert_includes response.body, "Jogos"
+  end
+
+  test "separates today and upcoming matches on index" do
+    player = user
+    travel_to Time.zone.local(2026, 6, 11, 10, 0, 0) do
+      match_record(kickoff_at: 2.hours.from_now)
+      match_record(kickoff_at: 2.days.from_now)
+
+      post session_path, params: { email: player.email, password: "secret123" }
+      with_empty_standings { get matches_path }
+
+      assert_response :success
+      assert_includes response.body, "Jogos do dia"
+      assert_includes response.body, "Próximos jogos"
+      assert_includes response.body, "Tabela de grupos"
+    end
   end
 
   test "hides other users predictions before kickoff" do

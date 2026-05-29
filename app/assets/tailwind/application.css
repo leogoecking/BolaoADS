@@ -162,6 +162,108 @@
     @apply rounded-lg border border-amber-300/70 bg-gradient-to-br from-amber-100 via-white to-emerald-50 p-5 shadow-xl shadow-amber-500/10;
   }
 
+  .match-section {
+    @apply mb-8;
+  }
+
+  .section-heading {
+    @apply mb-4 flex items-end justify-between gap-3;
+  }
+
+  .section-heading h2 {
+    @apply text-2xl font-black text-slate-950;
+  }
+
+  .count-pill,
+  .group-pill {
+    @apply inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-black uppercase text-emerald-800;
+  }
+
+  .match-grid {
+    @apply grid gap-3 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .match-card {
+    @apply block rounded-lg border border-white/80 bg-white/95 p-4 text-slate-900 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:text-slate-950 hover:shadow-xl;
+  }
+
+  .muted-card {
+    @apply bg-slate-50/90;
+  }
+
+  .match-meta,
+  .match-footer {
+    @apply mb-3 flex items-center justify-between gap-3 text-sm font-bold text-slate-500;
+  }
+
+  .match-footer {
+    @apply mb-0 mt-4 text-slate-700;
+  }
+
+  .team-row {
+    @apply mb-2 flex min-h-10 items-center gap-3;
+  }
+
+  .team-logo {
+    @apply h-10 w-10 shrink-0 rounded-md border border-slate-200 bg-white object-contain p-1 shadow-sm;
+  }
+
+  .team-logo.small {
+    @apply h-7 w-7 rounded;
+  }
+
+  .team-logo + .team-fallback {
+    @apply hidden;
+  }
+
+  .team-fallback {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-xs font-black text-slate-600;
+  }
+
+  .date-band {
+    @apply mb-5;
+  }
+
+  .date-band h3 {
+    @apply mb-2 text-lg font-black text-slate-800;
+  }
+
+  .compact-table {
+    @apply min-w-[860px];
+  }
+
+  .versus-line {
+    @apply flex flex-wrap items-center gap-2 font-black text-slate-950;
+  }
+
+  .team-inline {
+    @apply inline-flex items-center gap-2 font-black text-slate-900;
+  }
+
+  .groups-grid {
+    @apply grid gap-4 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .group-card {
+    @apply rounded-lg border border-white/80 bg-white/95 p-4 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5;
+  }
+
+  .group-card h3 {
+    @apply mb-3 text-lg font-black text-slate-950;
+  }
+
+  .group-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .group-table th {
+    @apply border-b border-slate-200 pb-2 text-left text-xs font-black uppercase text-slate-500;
+  }
+
+  .group-table td {
+    @apply border-b border-slate-100 py-2 align-middle;
+  }
+
   .stadium-score {
     @apply rounded-lg border border-amber-300 bg-gradient-to-br from-emerald-950 via-slate-950 to-emerald-900 px-6 py-5 text-center text-white shadow-2xl shadow-emerald-950/25 ring-4 ring-amber-300/30;
   }

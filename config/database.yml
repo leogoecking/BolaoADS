@@ -5,11 +5,11 @@ default: &default
 
 development:
   <<: *default
-  database: <%= ENV.fetch("BOLAOADS_DEVELOPMENT_DATABASE", "C:/Users/leogo/AppData/Local/BolaoADS/development.sqlite3") %>
+  database: <%= ENV.fetch("BOLAOADS_DEVELOPMENT_DATABASE", Rails.root.join("db/development.sqlite3")) %>
 
 test:
   <<: *default
-  database: <%= ENV.fetch("BOLAOADS_TEST_DATABASE", "C:/Users/leogo/AppData/Local/BolaoADS/test.sqlite3") %>
+  database: <%= ENV.fetch("BOLAOADS_TEST_DATABASE", Rails.root.join("db/test.sqlite3")) %>
 
 production:
   <<: *default

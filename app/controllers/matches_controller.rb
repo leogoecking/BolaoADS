@@ -2,7 +2,13 @@ class MatchesController < ApplicationController
   before_action :require_authentication
 
   def index
-    @matches = Match.ordered
+    @matches = Match.ordered.to_a
+    @today_matches = @matches.select { |match| match.kickoff_at.to_date == Date.current }
+    @upcoming_matches_by_date = @matches
+      .select { |match| match.kickoff_at.to_date > Date.current }
+      .group_by { |match| match.kickoff_at.to_date }
+    @past_matches = @matches.select { |match| match.kickoff_at.to_date < Date.current }.reverse
+    @group_standings = Football::GroupStandings.new.call
     @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
   end
 
