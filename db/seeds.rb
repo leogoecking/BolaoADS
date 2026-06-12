@@ -25,7 +25,7 @@ end
 
 Achievement.ensure_catalog!
 
-special_closes_at = Time.zone.local(2026, 6, 10, 23, 59, 0)
+special_closes_at = Time.zone.local(2026, 6, 18, 23, 59, 0)
 [
   ["campeao", "Campeao", "text", 20],
   ["vice_campeao", "Vice-campeao", "text", 15],

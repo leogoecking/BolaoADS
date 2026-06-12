@@ -1,0 +1,55 @@
+<section id="mural" class="match-section">
+  <div class="section-heading">
+    <div>
+      <p class="page-kicker">Mural</p>
+      <h2>Atividades do bolao</h2>
+    </div>
+    <span class="count-pill"><%= activity_events.size %></span>
+  </div>
+
+  <% if activity_events.any? %>
+    <div class="activity-list">
+      <% activity_events.each do |event| %>
+        <% prediction = event.prediction %>
+        <article class="activity-item">
+          <div class="activity-icon"><%= { "exact_score" => "3", "leader_changed" => "1", "ranking_drop" => "-" }[event.event_type] || "!" %></div>
+          <div class="activity-body">
+            <div class="activity-meta">
+              <span><%= l(event.created_at, format: :short) %></span>
+              <span><%= event.match.home_team.name %> x <%= event.match.away_team.name %></span>
+            </div>
+
+            <p class="activity-message"><%= event.message %></p>
+
+            <% if prediction&.match&.predictions_revealed? %>
+              <div class="activity-prediction">
+                <span class="font-black"><%= prediction.user.name %></span>
+                <span class="score-pill"><%= prediction.home_score %> x <%= prediction.away_score %></span>
+                <span class="font-black text-emerald-800"><%= prediction.points %> pts</span>
+              </div>
+
+              <div class="comment-list">
+                <% prediction.prediction_comments.sort_by(&:created_at).each do |comment| %>
+                  <div class="comment-item">
+                    <strong><%= comment.user.name %></strong>
+                    <span><%= comment.body %></span>
+                  </div>
+                <% end %>
+              </div>
+
+              <%= form_with model: [prediction, PredictionComment.new], url: prediction_comments_path(prediction), class: "comment-form" do |form| %>
+                <%= form.text_field :body, maxlength: 280, required: true, placeholder: "Comente esse palpite" %>
+                <%= form.submit "Comentar" %>
+              <% end %>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="panel-muted">
+      <p class="font-black text-slate-900">O mural ainda esta quieto.</p>
+      <p class="muted">Quando os jogos forem finalizados, os acertos, viradas e quedas aparecem aqui.</p>
+    </div>
+  <% end %>
+</section>

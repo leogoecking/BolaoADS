@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_secure_password
 
   has_many :predictions, dependent: :destroy
+  has_many :activity_events, dependent: :destroy
+  has_many :prediction_comments, dependent: :destroy
   has_many :user_achievements, dependent: :destroy
   has_many :achievements, through: :user_achievements
   has_many :special_predictions, dependent: :destroy

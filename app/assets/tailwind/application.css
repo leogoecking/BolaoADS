@@ -208,6 +208,46 @@
     @apply grid gap-3 md:grid-cols-2 xl:grid-cols-3;
   }
 
+  .activity-list {
+    @apply grid gap-3;
+  }
+
+  .activity-item {
+    @apply flex gap-3 rounded-lg border border-white/80 bg-white/95 p-4 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5;
+  }
+
+  .activity-icon {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-md bg-emerald-950 text-sm font-black text-amber-300 shadow-lg shadow-emerald-950/20;
+  }
+
+  .activity-body {
+    @apply min-w-0 flex-1;
+  }
+
+  .activity-meta {
+    @apply mb-1 flex flex-wrap items-center gap-2 text-xs font-black uppercase text-slate-500;
+  }
+
+  .activity-message {
+    @apply text-base font-black text-slate-950;
+  }
+
+  .activity-prediction {
+    @apply mt-3 flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm;
+  }
+
+  .comment-list {
+    @apply mt-3 grid gap-2;
+  }
+
+  .comment-item {
+    @apply rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700;
+  }
+
+  .comment-form {
+    @apply mt-3 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end;
+  }
+
   .match-card {
     @apply block rounded-lg border border-white/80 bg-white/95 p-4 text-slate-900 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:text-slate-950 hover:shadow-xl;
   }

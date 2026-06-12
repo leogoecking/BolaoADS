@@ -8,6 +8,7 @@ class MatchesController < ApplicationController
       .select { |match| match.kickoff_at.to_date > Date.current }
       .first(6)
     @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
+    @activity_events = ActivityEvent.recent.limit(20)
   end
 
   def calendar

@@ -5,6 +5,7 @@ class Match < ApplicationRecord
   belongs_to :away_team, class_name: "Team"
   belongs_to :underdog_team, class_name: "Team", optional: true
   has_many :predictions, dependent: :destroy
+  has_many :activity_events, dependent: :destroy
 
   validates :external_id, presence: true, uniqueness: true
   validates :kickoff_at, presence: true
@@ -38,7 +39,9 @@ class Match < ApplicationRecord
   def score_predictions
     return unless finished? && home_score.present? && away_score.present?
 
+    previous_ranking = User.ranking.to_a
     predictions.includes(:user).find_each { |prediction| PredictionSettlementService.new(prediction).call }
+    ActivityEventGenerator.new(self, previous_ranking: previous_ranking).call
   end
 
   def actual_result

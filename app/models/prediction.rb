@@ -1,6 +1,8 @@
 class Prediction < ApplicationRecord
   belongs_to :user
   belongs_to :match
+  has_many :activity_events, dependent: :nullify
+  has_many :prediction_comments, dependent: :destroy
 
   validates :user_id, uniqueness: { scope: :match_id }
   validates :home_score, :away_score, numericality: { only_integer: true, greater_than_or_equal_to: 0 }

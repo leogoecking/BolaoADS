@@ -13,6 +13,8 @@
   <%= link_to "📊 Fase de grupos", groups_matches_path, class: "button-secondary" %>
 </div>
 
+<%= render "activity_feed", activity_events: @activity_events %>
+
 <% if @matches.any? %>
   <section class="match-section">
     <div class="section-heading">

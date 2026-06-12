@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_28_000800) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_28_000900) do
   create_table "achievements", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -18,6 +18,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000800) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_achievements_on_key", unique: true
+  end
+
+  create_table "activity_events", force: :cascade do |t|
+    t.string "event_type", null: false
+    t.integer "user_id", null: false
+    t.integer "match_id", null: false
+    t.integer "prediction_id"
+    t.string "message", null: false
+    t.string "dedupe_key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_activity_events_on_created_at"
+    t.index ["dedupe_key"], name: "index_activity_events_on_dedupe_key", unique: true
+    t.index ["match_id"], name: "index_activity_events_on_match_id"
+    t.index ["prediction_id"], name: "index_activity_events_on_prediction_id"
+    t.index ["user_id"], name: "index_activity_events_on_user_id"
   end
 
   create_table "matches", force: :cascade do |t|
@@ -42,6 +58,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000800) do
     t.index ["knockout"], name: "index_matches_on_knockout"
     t.index ["status"], name: "index_matches_on_status"
     t.index ["underdog_team_id"], name: "index_matches_on_underdog_team_id"
+  end
+
+  create_table "prediction_comments", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "prediction_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_prediction_comments_on_created_at"
+    t.index ["prediction_id"], name: "index_prediction_comments_on_prediction_id"
+    t.index ["user_id"], name: "index_prediction_comments_on_user_id"
   end
 
   create_table "predictions", force: :cascade do |t|
@@ -115,9 +142,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000800) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "activity_events", "matches"
+  add_foreign_key "activity_events", "predictions"
+  add_foreign_key "activity_events", "users"
   add_foreign_key "matches", "teams", column: "away_team_id"
   add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "matches", "teams", column: "underdog_team_id"
+  add_foreign_key "prediction_comments", "predictions"
+  add_foreign_key "prediction_comments", "users"
   add_foreign_key "predictions", "matches"
   add_foreign_key "predictions", "users"
   add_foreign_key "special_predictions", "special_questions"

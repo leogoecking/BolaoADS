@@ -13,6 +13,10 @@ Rails.application.routes.draw do
     resource :prediction, only: %i[create update]
   end
 
+  resources :predictions, only: [] do
+    resources :comments, controller: :prediction_comments, only: :create
+  end
+
   resource :ranking, only: :show
   resource :achievements, only: :show
   resources :special_predictions, only: %i[index create update]
