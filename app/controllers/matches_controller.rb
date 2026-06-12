@@ -20,6 +20,21 @@ class MatchesController < ApplicationController
     @group_standings = Football::GroupStandings.new.call
   end
 
+  def live_sync
+    result = Football::LiveScoreSync.call
+
+    render json: {
+      ok: true,
+      synced_count: result.fetch(:synced_count),
+      changed_count: result.fetch(:changed_count),
+      skipped: result.fetch(:skipped),
+      last_synced_at: result.fetch(:last_synced_at)&.iso8601,
+      has_live_matches: Match.where(status: "live").exists?
+    }
+  rescue Football::ApiClient::ApiError => error
+    render json: { ok: false, error: error.message }, status: :bad_gateway
+  end
+
   def show
     @match = Match.includes(:home_team, :away_team).find(params[:id])
     @prediction = current_user.predictions.find_or_initialize_by(match: @match)

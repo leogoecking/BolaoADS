@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_28_001000) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_12_000100) do
   create_table "achievements", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -51,6 +51,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_001000) do
     t.datetime "updated_at", null: false
     t.boolean "knockout", default: false, null: false
     t.integer "underdog_team_id"
+    t.integer "current_minute"
+    t.string "period"
+    t.text "live_incidents", default: "[]", null: false
+    t.datetime "live_incidents_synced_at"
     t.index ["away_team_id"], name: "index_matches_on_away_team_id"
     t.index ["external_id"], name: "index_matches_on_external_id", unique: true
     t.index ["home_team_id"], name: "index_matches_on_home_team_id"

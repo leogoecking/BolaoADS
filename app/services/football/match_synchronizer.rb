@@ -65,12 +65,13 @@ module Football
       "Uzbekistan" => "Uzbequistão"
     }.freeze
 
-    def initialize(client: ApiClient.new)
+    def initialize(client: ClientFactory.build, live_only: false)
       @client = client
+      @live_only = live_only
     end
 
     def call
-      client.matches.sum do |payload|
+      payloads.sum do |payload|
         upsert_match(payload)
         1
       end
@@ -78,26 +79,46 @@ module Football
 
     private
 
-    attr_reader :client
+    attr_reader :client, :live_only
+
+    def payloads
+      return client.live_matches if live_only && client.respond_to?(:live_matches)
+
+      client.matches
+    end
 
     def upsert_match(payload)
       home_team = find_or_create_team(team_payload(payload, "home"))
       away_team = find_or_create_team(team_payload(payload, "away"))
-      match = Match.find_or_initialize_by(external_id: external_id(payload))
+      kickoff = kickoff_at(payload)
+      match = find_match(payload, home_team, away_team, kickoff)
 
       match.assign_attributes(
         home_team: home_team,
         away_team: away_team,
-        kickoff_at: kickoff_at(payload),
+        kickoff_at: kickoff,
         status: status(payload),
         home_score: score(payload, "home"),
         away_score: score(payload, "away"),
+        current_minute: current_minute(payload),
+        period: period(payload),
         stage: payload["stage"] || payload["round"],
         group_name: payload["group"] || payload["group_name"],
         last_synced_at: Time.current
       )
 
       match.save!
+      sync_incidents(match, payload) if live_only
+    end
+
+    def find_match(payload, home_team, away_team, kickoff)
+      existing = Match.find_by(external_id: external_id(payload))
+      return existing if existing
+
+      Match
+        .where(home_team: home_team, away_team: away_team)
+        .where(kickoff_at: (kickoff - 6.hours)..(kickoff + 6.hours))
+        .first || Match.new(external_id: external_id(payload))
     end
 
     def find_or_create_team(payload)
@@ -149,6 +170,27 @@ module Football
         payload["#{side}_score"].presence ||
         payload.dig("scores", side).presence ||
         payload.dig("score", "fullTime", side)
+    end
+
+    def current_minute(payload)
+      payload["current_minute"] || payload["minute"] || payload.dig("time", "minute")
+    end
+
+    def period(payload)
+      payload["period"] || payload.dig("time", "period")
+    end
+
+    def sync_incidents(match, payload)
+      return unless client.respond_to?(:incidents)
+
+      incidents = client.incidents(external_id(payload))
+      match.update_columns(
+        live_incidents: JSON.generate(incidents),
+        live_incidents_synced_at: Time.current,
+        updated_at: Time.current
+      )
+    rescue ApiClient::ApiError
+      nil
     end
 
     def fallback_external_id(payload)

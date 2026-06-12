@@ -248,6 +248,18 @@
     @apply mt-3 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end;
   }
 
+  .timeline-list {
+    @apply grid gap-2;
+  }
+
+  .timeline-item {
+    @apply flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3;
+  }
+
+  .timeline-minute {
+    @apply inline-flex min-w-12 justify-center rounded-md bg-emerald-950 px-2 py-1 text-xs font-black text-amber-300 shadow-sm;
+  }
+
   .match-card {
     @apply block rounded-lg border border-white/80 bg-white/95 p-4 text-slate-900 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:text-slate-950 hover:shadow-xl;
   }

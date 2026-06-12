@@ -1,0 +1,33 @@
+<% content_for :body_scripts do %>
+  <script>
+    (() => {
+      const intervalMs = 60000;
+      const syncUrl = "<%= live_sync_matches_path %>";
+      const csrfToken = document.querySelector("meta[name='csrf-token']")?.content;
+
+      async function syncLiveScores() {
+        try {
+          const response = await fetch(syncUrl, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-Token": csrfToken
+            },
+            cache: "no-store",
+            credentials: "same-origin"
+          });
+          if (!response.ok) return;
+
+          const payload = await response.json();
+          if (payload.ok && payload.changed_count > 0) {
+            window.location.reload();
+          }
+        } catch (_error) {
+        }
+      }
+
+      window.setInterval(syncLiveScores, intervalMs);
+      syncLiveScores();
+    })();
+  </script>
+<% end %>

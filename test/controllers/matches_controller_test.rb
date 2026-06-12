@@ -17,6 +17,20 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     Football.const_set(:GroupStandings, original)
   end
 
+  def with_live_score_sync(result)
+    original = Football::LiveScoreSync
+    replacement = Class.new do
+      define_singleton_method(:call) { result }
+    end
+
+    Football.send(:remove_const, :LiveScoreSync)
+    Football.const_set(:LiveScoreSync, replacement)
+    yield
+  ensure
+    Football.send(:remove_const, :LiveScoreSync)
+    Football.const_set(:LiveScoreSync, original)
+  end
+
   test "redirects unauthenticated user" do
     get matches_path
 
@@ -74,6 +88,25 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Fase de grupos"
     assert_includes response.body, "Tabela indispon"
+  end
+
+  test "syncs live scores as json" do
+    player = user
+    game = match_record(status: "live", home_score: 1, away_score: 0)
+
+    post session_path, params: { email: player.email, password: "secret123" }
+    with_live_score_sync({ synced_count: 1, changed_count: 1, skipped: false, last_synced_at: Time.zone.parse("2026-06-12T12:00:00Z") }) do
+      post live_sync_matches_path
+    end
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal true, payload["ok"]
+    assert_equal 1, payload["synced_count"]
+    assert_equal 1, payload["changed_count"]
+    assert_equal false, payload["skipped"]
+    assert_equal true, payload["has_live_matches"]
+    assert_equal "live", game.reload.status
   end
 
   test "hides other users predictions before kickoff" do

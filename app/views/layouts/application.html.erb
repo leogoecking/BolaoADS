@@ -48,5 +48,6 @@
       <% if alert.present? %><div class="flash alert"><%= alert %></div><% end %>
       <%= yield %>
     </main>
+    <%= yield :body_scripts %>
   </body>
 </html>

@@ -36,6 +36,18 @@ class Match < ApplicationRecord
     status == "finished"
   end
 
+  def live_incident_list
+    JSON.parse(live_incidents.presence || "[]")
+  rescue JSON::ParserError
+    []
+  end
+
+  def live_clock_label
+    return nil if current_minute.blank? && period.blank?
+
+    [ current_minute.present? ? "#{current_minute}'" : nil, period.presence ].compact.join(" · ")
+  end
+
   def score_predictions
     return unless finished? && home_score.present? && away_score.present?
 

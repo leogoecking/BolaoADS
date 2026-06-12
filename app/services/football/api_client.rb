@@ -8,10 +8,12 @@ module Football
     def initialize(
       base_url: ENV.fetch("FOOTBALL_API_BASE_URL", "https://sports.bzzoiro.com/api/v2/"),
       matches_path: ENV.fetch("FOOTBALL_API_MATCHES_PATH", "events/?league_id=27&season_id=188&limit=200"),
+      live_path: ENV.fetch("FOOTBALL_API_LIVE_PATH", "events/live/?league_id=27&season_id=188"),
       api_key: ENV["FOOTBALL_API_KEY"]
     )
       @base_url = base_url
       @matches_path = matches_path
+      @live_path = live_path
       @api_key = api_key.to_s.gsub(/\s+/, "")
     end
 
@@ -29,13 +31,23 @@ module Football
       payloads
     end
 
+    def live_matches
+      payload = get_json(live_path)
+      Array(payload["results"] || payload["matches"] || payload["data"] || payload["events"] || payload)
+    end
+
+    def incidents(event_id)
+      payload = get_json("events/#{event_id}/incidents/")
+      Array(payload["incidents"] || payload["results"] || payload["data"])
+    end
+
     def group_standings
       get_json(ENV.fetch("FOOTBALL_API_STANDINGS_PATH", "leagues/27/standings/?season_id=188"))
     end
 
     private
 
-    attr_reader :base_url, :matches_path, :api_key
+    attr_reader :base_url, :matches_path, :live_path, :api_key
 
     def get_json(path)
       raise ApiError, "FOOTBALL_API_KEY nao configurada" if api_key.blank?
@@ -57,4 +69,5 @@ module Football
       raise ApiError, "Falha de conexao com a API: #{error.message}"
     end
   end
+
 end

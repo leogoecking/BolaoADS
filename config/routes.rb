@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     collection do
       get :calendar
       get :groups
+      post :live_sync
     end
 
     resource :prediction, only: %i[create update]

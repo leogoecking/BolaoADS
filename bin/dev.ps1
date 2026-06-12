@@ -7,6 +7,22 @@ $HostAddress = if ($env:HOST) { $env:HOST } else { "0.0.0.0" }
 $Port = if ($env:PORT) { [int]$env:PORT } else { 3000 }
 $PidPath = Join-Path $ProjectRoot "tmp\pids\server.pid"
 
+function Import-DotEnv($Path) {
+  if (-not (Test-Path $Path)) {
+    return
+  }
+
+  Get-Content $Path | ForEach-Object {
+    $Line = $_.Trim()
+    if (-not $Line -or $Line.StartsWith("#") -or -not $Line.Contains("=")) {
+      return
+    }
+
+    $Parts = $Line -split "=", 2
+    [Environment]::SetEnvironmentVariable($Parts[0].Trim(), $Parts[1].Trim(), "Process")
+  }
+}
+
 function Get-LanAddress {
   if ($env:PUBLIC_HOST) {
     return $env:PUBLIC_HOST
@@ -65,6 +81,8 @@ if (Get-Command ruby -ErrorAction SilentlyContinue) {
 
 Push-Location $ProjectRoot
 try {
+  Import-DotEnv (Join-Path $ProjectRoot ".env")
+
   $LanAddress = Get-LanAddress
 
   if (Test-Path $PidPath) {

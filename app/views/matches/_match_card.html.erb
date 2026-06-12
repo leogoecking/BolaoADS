@@ -17,6 +17,6 @@
   </div>
   <div class="match-footer">
     <span class="score-pill"><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></span>
-    <span><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></span>
+    <span><%= match.live_clock_label.presence || (prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite") %></span>
   </div>
 <% end %>

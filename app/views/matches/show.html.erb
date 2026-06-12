@@ -11,7 +11,7 @@
     <div class="stadium-score">
       <p class="text-xs font-black uppercase text-emerald-100">placar da treta</p>
       <p class="text-4xl font-black"><%= @match.home_score.nil? ? "-" : "#{@match.home_score} x #{@match.away_score}" %></p>
-      <p class="text-xs font-bold text-amber-200">sem clubismo aqui... talvez 😅</p>
+      <p class="text-xs font-bold text-amber-200"><%= @match.live_clock_label.presence || "sem clubismo aqui... talvez 😅" %></p>
     </div>
     <div class="lg:text-right">
       <p class="page-kicker">🚌 Visitante</p>
@@ -33,6 +33,16 @@
       <p class="font-black text-amber-700"><%= current_user.adcoins_balance %> ADcoins</p>
     </div>
   </div>
+
+  <% if @match.live_clock_label.present? %>
+    <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+      <p class="text-xs font-black uppercase text-emerald-700">tempo do jogo</p>
+      <p class="text-lg font-black text-emerald-950"><%= @match.live_clock_label %></p>
+      <% if @match.last_synced_at.present? %>
+        <p class="muted">Atualizado em <%= l(@match.last_synced_at, format: :short) %></p>
+      <% end %>
+    </div>
+  <% end %>
 
   <div class="mt-5">
     <span class="status-pill <%= @match.open_for_predictions? ? "status-open" : "status-closed" %>"><%= @match.open_for_predictions? ? "Aberto pra corneta 🔥" : "#{@match.status} 😬" %></span>
@@ -105,3 +115,34 @@
     <p class="muted">Os palpites dos outros participantes ficam escondidos ate a bola rolar. Sem copiar a call do coleguinha.</p>
   </div>
 <% end %>
+
+<div class="panel mt-4">
+  <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="page-kicker">ao vivo</p>
+      <h2 class="text-xl font-black text-slate-950">Lances importantes</h2>
+    </div>
+    <% if @match.live_incidents_synced_at.present? %>
+      <span class="muted">Atualizado em <%= l(@match.live_incidents_synced_at, format: :short) %></span>
+    <% end %>
+  </div>
+
+  <% incidents = @match.live_incident_list.first(12) %>
+  <% if incidents.any? %>
+    <div class="timeline-list">
+      <% incidents.each do |incident| %>
+        <div class="timeline-item">
+          <span class="timeline-minute"><%= incident["minute"].present? ? "#{incident["minute"]}'" : "--" %></span>
+          <div class="min-w-0">
+            <p class="font-black text-slate-950"><%= incident["text"].presence || incident["type"].to_s.humanize %></p>
+            <p class="muted"><%= [incident["type"], incident["home_score"].nil? ? nil : "#{incident["home_score"]} x #{incident["away_score"]}"].compact.join(" · ") %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="muted">Nenhum lance importante disponivel para esta partida ainda.</p>
+  <% end %>
+</div>
+
+<%= render "live_score_polling" %>
