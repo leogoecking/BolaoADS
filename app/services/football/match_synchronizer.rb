@@ -16,6 +16,55 @@ module Football
       "cancelled" => "postponed"
     }.freeze
 
+    TEAM_NAME_TRANSLATIONS = {
+      "Algeria" => "Argélia",
+      "Australia" => "Austrália",
+      "Austria" => "Áustria",
+      "Belgium" => "Bélgica",
+      "Bosnia & Herzegovina" => "Bósnia e Herzegovina",
+      "Brazil" => "Brasil",
+      "Canada" => "Canadá",
+      "Colombia" => "Colômbia",
+      "Croatia" => "Croácia",
+      "Curaçao" => "Curaçao",
+      "Côte d'Ivoire" => "Costa do Marfim",
+      "Czechia" => "Tchéquia",
+      "DR Congo" => "RD Congo",
+      "Ecuador" => "Equador",
+      "Egypt" => "Egito",
+      "England" => "Inglaterra",
+      "France" => "França",
+      "Franca" => "França",
+      "Germany" => "Alemanha",
+      "Ghana" => "Gana",
+      "Haiti" => "Haiti",
+      "Iran" => "Irã",
+      "Iraq" => "Iraque",
+      "Japan" => "Japão",
+      "Jordan" => "Jordânia",
+      "Mexico" => "México",
+      "Morocco" => "Marrocos",
+      "Netherlands" => "Países Baixos",
+      "New Zealand" => "Nova Zelândia",
+      "Norway" => "Noruega",
+      "Panama" => "Panamá",
+      "Paraguay" => "Paraguai",
+      "Qatar" => "Catar",
+      "Saudi Arabia" => "Arábia Saudita",
+      "Scotland" => "Escócia",
+      "Senegal" => "Senegal",
+      "South Africa" => "África do Sul",
+      "South Korea" => "Coreia do Sul",
+      "Spain" => "Espanha",
+      "Sweden" => "Suécia",
+      "Switzerland" => "Suíça",
+      "Tunisia" => "Tunísia",
+      "Türkiye" => "Turquia",
+      "USA" => "Estados Unidos",
+      "Uruguay" => "Uruguai",
+      "Uzbekistan" => "Uzbequistão"
+    }.freeze
+
     def initialize(client: ApiClient.new)
       @client = client
     end
@@ -52,8 +101,14 @@ module Football
     end
 
     def find_or_create_team(payload)
-      Team.find_by(code: payload.fetch(:code)) || Team.find_by(name: payload.fetch(:name)) || Team.create!(code: payload.fetch(:code)) do |team|
-        team.name = payload.fetch(:name)
+      team = Team.find_by(code: payload.fetch(:code)) || Team.find_by(name: payload.fetch(:name))
+      if team
+        team.update!(name: payload.fetch(:name)) if team.name != payload.fetch(:name)
+        team
+      else
+        Team.create!(code: payload.fetch(:code)) do |new_team|
+          new_team.name = payload.fetch(:name)
+        end
       end
     end
 
@@ -63,7 +118,11 @@ module Football
       name = team["name"] || payload["#{side}_team"] || payload["#{side}_team_name"] || side.titleize
       code = team["code"] || team["tla"] || team["short_name"] || external_team_code(payload, side) || name.parameterize.upcase.first(12)
 
-      { name: name, code: code }
+      { name: localized_team_name(name), code: code }
+    end
+
+    def localized_team_name(name)
+      TEAM_NAME_TRANSLATIONS.fetch(name.to_s, name.to_s)
     end
 
     def external_team_code(payload, side)

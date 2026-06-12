@@ -1,6 +1,7 @@
 brasil = Team.find_or_create_by!(code: "BRA") { |team| team.name = "Brasil" }
 argentina = Team.find_or_create_by!(code: "ARG") { |team| team.name = "Argentina" }
-franca = Team.find_or_create_by!(code: "FRA") { |team| team.name = "Franca" }
+franca = Team.find_or_create_by!(code: "FRA") { |team| team.name = "França" }
+franca.update!(name: "França") if franca.name != "França"
 alemanha = Team.find_or_create_by!(code: "ALE") { |team| team.name = "Alemanha" }
 
 Match.find_or_create_by!(external_id: "seed-bra-arg") do |match|
