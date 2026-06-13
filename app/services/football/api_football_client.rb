@@ -4,6 +4,9 @@ require "json"
 module Football
   class ApiFootballClient
     ApiError = ApiClient::ApiError
+    DEFAULT_BASE_URL = "https://v3.football.api-sports.io/"
+    DEFAULT_MATCHES_PATH = "fixtures?league=1&season=2026"
+    DEFAULT_LIVE_PATH = "fixtures?league=1&season=2026&live=all"
 
     STATUS_MAP = {
       "TBD" => "scheduled",
@@ -27,9 +30,9 @@ module Football
     }.freeze
 
     def initialize(
-      base_url: ENV.fetch("API_FOOTBALL_BASE_URL", "https://v3.football.api-sports.io/"),
-      matches_path: ENV.fetch("API_FOOTBALL_MATCHES_PATH", "fixtures?league=1&season=2026"),
-      live_path: ENV.fetch("API_FOOTBALL_LIVE_PATH", "fixtures?league=1&season=2026&live=all"),
+      base_url: ENV["API_FOOTBALL_BASE_URL"].presence || DEFAULT_BASE_URL,
+      matches_path: ENV["API_FOOTBALL_MATCHES_PATH"].presence || DEFAULT_MATCHES_PATH,
+      live_path: ENV["API_FOOTBALL_LIVE_PATH"].presence || DEFAULT_LIVE_PATH,
       api_key: ENV["API_FOOTBALL_KEY"]
     )
       @base_url = base_url

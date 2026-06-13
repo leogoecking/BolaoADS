@@ -31,6 +31,23 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     Football.const_set(:LiveScoreSync, original)
   end
 
+  def with_live_match_stats(result)
+    original = Football::LiveMatchStats
+    replacement = Class.new do
+      define_method(:initialize) do |_match|
+      end
+
+      define_method(:call) { result }
+    end
+
+    Football.send(:remove_const, :LiveMatchStats)
+    Football.const_set(:LiveMatchStats, replacement)
+    yield
+  ensure
+    Football.send(:remove_const, :LiveMatchStats)
+    Football.const_set(:LiveMatchStats, original)
+  end
+
   test "redirects unauthenticated user" do
     get matches_path
 
@@ -119,6 +136,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     get match_path(game)
 
     assert_response :success
+    assert_includes response.body, "Ver palpites"
     assert_includes response.body, "Palpites secretos"
     assert_not_includes response.body, "Carlos"
     assert_not_includes response.body, "4 x 4"
@@ -135,8 +153,29 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     get match_path(game)
 
     assert_response :success
+    assert_includes response.body, "Ver palpites"
+    assert_includes response.body, "match-predictions-modal"
     assert_includes response.body, "Palpites revelados"
     assert_includes response.body, "Carlos"
     assert_includes response.body, "4 x 4"
+  end
+
+  test "shows stats modal button when live stats are available" do
+    player = user
+    game = match_record(kickoff_at: 1.minute.ago, status: "live", home_score: 0, away_score: 0)
+    stats = {
+      rows: [
+        { key: "ball_possession", label: "Posse de bola", home_label: "55%", away_label: "45%" }
+      ],
+      shot_count: 2
+    }
+
+    post session_path, params: { email: player.email, password: "secret123" }
+    with_live_match_stats(stats) { get match_path(game) }
+
+    assert_response :success
+    assert_includes response.body, "Ver estatisticas"
+    assert_includes response.body, "match-stats-modal"
+    assert_includes response.body, "Posse de bola"
   end
 end

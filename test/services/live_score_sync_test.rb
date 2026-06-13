@@ -65,4 +65,44 @@ class LiveScoreSyncTest < ActiveSupport::TestCase
       assert_equal 2, game.home_score
     end
   end
+
+  test "reports changed match when only live minute changes" do
+    game = match_record(status: "live", home_score: 1, away_score: 0)
+    synchronizer = Class.new do
+      def initialize(live_only: false)
+      end
+
+      def call
+        Match.where(status: "live").update_all(current_minute: 64)
+        1
+      end
+    end
+
+    with_match_synchronizer(synchronizer) do
+      result = Football::LiveScoreSync.call
+
+      assert_equal 1, result[:synced_count]
+      assert_equal 1, result[:changed_count]
+      assert_equal 64, game.reload.current_minute
+    end
+  end
+
+  test "marks throttled sync as skipped without changing changed count" do
+    synchronizer = Class.new do
+      def initialize(live_only: false)
+      end
+
+      def call
+        1
+      end
+    end
+
+    with_match_synchronizer(synchronizer) do
+      Football::LiveScoreSync.call
+      result = Football::LiveScoreSync.call
+
+      assert_equal true, result[:skipped]
+      assert_equal 0, result[:changed_count]
+    end
+  end
 end

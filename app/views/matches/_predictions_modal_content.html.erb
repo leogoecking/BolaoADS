@@ -1,0 +1,32 @@
+<% if match.predictions_revealed? %>
+  <h2 class="mb-4 text-xl font-black text-slate-950">Palpites revelados: hora do julgamento 🧾</h2>
+  <% if revealed_predictions.any? %>
+    <div class="table-shell overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Participante</th>
+            <th>Cravada</th>
+            <th>ADcoins</th>
+            <th>Pontos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% revealed_predictions.each do |prediction| %>
+            <tr>
+              <td class="font-black"><%= prediction.user.name %></td>
+              <td><span class="score-pill"><%= prediction.home_score %> x <%= prediction.away_score %></span></td>
+              <td class="font-bold text-amber-700"><%= prediction.adcoins_wager %> 🪙</td>
+              <td class="font-black text-emerald-800"><%= prediction.points %> 🔥</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="muted">Ninguem palpitou nesta partida. A coragem passou longe.</p>
+  <% end %>
+<% else %>
+  <h2 class="text-xl font-black text-slate-950">Palpites secretos 🤫</h2>
+  <p class="muted mt-2">Os palpites dos outros participantes ficam escondidos ate a bola rolar. Sem copiar a call do coleguinha.</p>
+<% end %>

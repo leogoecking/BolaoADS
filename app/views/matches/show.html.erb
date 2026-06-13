@@ -1,35 +1,35 @@
 <div class="mb-4">
-  <%= link_to "⬅️ Voltar aos jogos", matches_path, class: "button-secondary" %>
+  <%= link_to "Voltar aos jogos", matches_path, class: "button-secondary" %>
 </div>
 
 <div class="panel">
   <div class="grid gap-5 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
     <div>
-      <p class="page-kicker">🏠 Mandante</p>
+      <p class="page-kicker">Mandante</p>
       <h1 class="text-3xl font-black text-slate-950"><%= @match.home_team.name %></h1>
     </div>
     <div class="stadium-score">
       <p class="text-xs font-black uppercase text-emerald-100">placar da treta</p>
-      <p class="text-4xl font-black"><%= @match.home_score.nil? ? "-" : "#{@match.home_score} x #{@match.away_score}" %></p>
-      <p class="text-xs font-bold text-amber-200"><%= @match.live_clock_label.presence || "sem clubismo aqui... talvez 😅" %></p>
+      <p class="text-4xl font-black"><%= @match.score_label %></p>
+      <p class="text-xs font-bold text-amber-200"><%= @match.live_clock_label.presence || "sem clubismo aqui... talvez" %></p>
     </div>
     <div class="lg:text-right">
-      <p class="page-kicker">🚌 Visitante</p>
+      <p class="page-kicker">Visitante</p>
       <h1 class="text-3xl font-black text-slate-950"><%= @match.away_team.name %></h1>
     </div>
   </div>
 
   <div class="stat-grid mt-6">
     <div class="stat-card">
-      <p class="muted">⏰ Inicio</p>
+      <p class="muted">Inicio</p>
       <p class="font-black text-slate-950"><%= l(@match.kickoff_at, format: :long) %></p>
     </div>
     <div class="stat-card">
-      <p class="muted">🚨 Palpites ate</p>
+      <p class="muted">Palpites ate</p>
       <p class="font-black text-slate-950"><%= l(@match.prediction_deadline, format: :long) %></p>
     </div>
     <div class="stat-card">
-      <p class="muted">🪙 Saldo pra ousar</p>
+      <p class="muted">Saldo pra ousar</p>
       <p class="font-black text-amber-700"><%= current_user.adcoins_balance %> ADcoins</p>
     </div>
   </div>
@@ -45,7 +45,7 @@
   <% end %>
 
   <div class="mt-5">
-    <span class="status-pill <%= @match.open_for_predictions? ? "status-open" : "status-closed" %>"><%= @match.open_for_predictions? ? "Aberto pra corneta 🔥" : "#{@match.status} 😬" %></span>
+    <span class="status-pill <%= @match.open_for_predictions? || @match.live? ? "status-open" : "status-closed" %>"><%= @match.open_for_predictions? ? "Aberto pra corneta" : @match.status_label %></span>
   </div>
 
   <%= render "shared/errors", object: @prediction %>
@@ -62,59 +62,67 @@
           <%= form.number_field :away_score, min: 0, required: true %>
         </div>
         <div>
-          <%= form.label :adcoins_wager, "ADcoins na mesa 🪙" %>
+          <%= form.label :adcoins_wager, "ADcoins na mesa" %>
           <%= form.number_field :adcoins_wager, min: 0, max: current_user.adcoins_balance + @prediction.adcoins_wager.to_i, required: true %>
         </div>
-        <%= form.submit "Cravar palpite 🚀" %>
+        <%= form.submit "Cravar palpite" %>
       </div>
     <% end %>
   <% elsif @prediction.persisted? %>
     <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <p>Seu palpite ficou registrado: <strong><%= @prediction.home_score %> x <%= @prediction.away_score %> 🎯</strong></p>
-      <p>ADcoins na emoção: <strong><%= @prediction.adcoins_wager %> 🪙</strong></p>
+      <p>Seu palpite ficou registrado: <strong><%= @prediction.home_score %> x <%= @prediction.away_score %></strong></p>
+      <p>ADcoins na emocao: <strong><%= @prediction.adcoins_wager %></strong></p>
     </div>
     <p class="muted">Edicao encerrada. Agora e torcer e aguentar a resenha.</p>
   <% else %>
-    <p class="muted">Palpites encerrados. Quem mandou dormir no ponto? 😬</p>
+    <p class="muted">Palpites encerrados. Quem mandou dormir no ponto?</p>
   <% end %>
 </div>
 
-<% if @match.predictions_revealed? %>
-  <div class="panel mt-4">
-    <h2 class="mb-4 text-xl font-black text-slate-950">Palpites revelados: hora do julgamento 🧾</h2>
-    <% if @revealed_predictions.any? %>
-      <div class="table-shell overflow-x-auto">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Participante</th>
-              <th>Cravada</th>
-              <th>ADcoins</th>
-              <th>Pontos</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @revealed_predictions.each do |prediction| %>
-              <tr>
-                <td class="font-black"><%= prediction.user.name %></td>
-                <td><span class="score-pill"><%= prediction.home_score %> x <%= prediction.away_score %></span></td>
-                <td class="font-bold text-amber-700"><%= prediction.adcoins_wager %> 🪙</td>
-                <td class="font-black text-emerald-800"><%= prediction.points %> 🔥</td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+<div class="panel mt-4">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="page-kicker">detalhes</p>
+      <h2 class="text-xl font-black text-slate-950">Mais informacoes do jogo</h2>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <% if @live_stats.present? && @live_stats[:rows].present? %>
+        <button type="button" class="button-secondary" data-modal-open="match-stats-modal">Ver estatisticas</button>
+      <% end %>
+      <button type="button" class="button-secondary" data-modal-open="match-predictions-modal">Ver palpites</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="match-stats-modal" class="match-modal">
+  <div class="match-modal-card">
+    <div class="match-modal-header">
+      <div>
+        <p class="page-kicker">detalhes</p>
+        <h2 class="text-xl font-black text-slate-950">Estatisticas</h2>
       </div>
-    <% else %>
-      <p class="muted">Ninguem palpitou nesta partida. A coragem passou longe.</p>
-    <% end %>
+      <button type="button" class="match-modal-close" data-modal-close aria-label="Fechar">x</button>
+    </div>
+    <div class="match-modal-body">
+      <%= render "live_match_stats", match: @match, live_stats: @live_stats %>
+    </div>
   </div>
-<% else %>
-  <div class="panel mt-4">
-    <h2 class="text-xl font-black text-slate-950">Palpites secretos 🤫</h2>
-    <p class="muted">Os palpites dos outros participantes ficam escondidos ate a bola rolar. Sem copiar a call do coleguinha.</p>
+</dialog>
+
+<dialog id="match-predictions-modal" class="match-modal">
+  <div class="match-modal-card">
+    <div class="match-modal-header">
+      <div>
+        <p class="page-kicker">bolao</p>
+        <h2 class="text-xl font-black text-slate-950">Palpites</h2>
+      </div>
+      <button type="button" class="match-modal-close" data-modal-close aria-label="Fechar">x</button>
+    </div>
+    <div class="match-modal-body">
+      <%= render "predictions_modal_content", match: @match, revealed_predictions: Array(@revealed_predictions) %>
+    </div>
   </div>
-<% end %>
+</dialog>
 
 <div class="panel mt-4">
   <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -132,10 +140,12 @@
     <div class="timeline-list">
       <% incidents.each do |incident| %>
         <div class="timeline-item">
-          <span class="timeline-minute"><%= incident["minute"].present? ? "#{incident["minute"]}'" : "--" %></span>
+          <span class="timeline-minute"><%= @match.incident_minute_label(incident) %></span>
           <div class="min-w-0">
-            <p class="font-black text-slate-950"><%= incident["text"].presence || incident["type"].to_s.humanize %></p>
-            <p class="muted"><%= [incident["type"], incident["home_score"].nil? ? nil : "#{incident["home_score"]} x #{incident["away_score"]}"].compact.join(" · ") %></p>
+            <p class="font-black text-slate-950"><%= @match.incident_title(incident) %></p>
+            <% if @match.incident_meta(incident).present? %>
+              <p class="muted"><%= @match.incident_meta(incident) %></p>
+            <% end %>
           </div>
         </div>
       <% end %>
@@ -146,3 +156,26 @@
 </div>
 
 <%= render "live_score_polling" %>
+
+<% content_for :body_scripts do %>
+  <script>
+    (() => {
+      document.querySelectorAll("[data-modal-open]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const dialog = document.getElementById(button.dataset.modalOpen);
+          if (dialog && !dialog.open) dialog.showModal();
+        });
+      });
+
+      document.querySelectorAll(".match-modal").forEach((dialog) => {
+        dialog.querySelectorAll("[data-modal-close]").forEach((button) => {
+          button.addEventListener("click", () => dialog.close());
+        });
+
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) dialog.close();
+        });
+      });
+    })();
+  </script>
+<% end %>

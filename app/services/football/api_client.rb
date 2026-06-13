@@ -4,11 +4,14 @@ require "json"
 module Football
   class ApiClient
     ApiError = Class.new(StandardError)
+    DEFAULT_BASE_URL = "https://sports.bzzoiro.com/api/v2/"
+    DEFAULT_MATCHES_PATH = "events/?league_id=27&season_id=188&limit=200"
+    DEFAULT_LIVE_PATH = "events/live/?league_id=27&season_id=188"
 
     def initialize(
-      base_url: ENV.fetch("FOOTBALL_API_BASE_URL", "https://sports.bzzoiro.com/api/v2/"),
-      matches_path: ENV.fetch("FOOTBALL_API_MATCHES_PATH", "events/?league_id=27&season_id=188&limit=200"),
-      live_path: ENV.fetch("FOOTBALL_API_LIVE_PATH", "events/live/?league_id=27&season_id=188"),
+      base_url: ENV["FOOTBALL_API_BASE_URL"].presence || DEFAULT_BASE_URL,
+      matches_path: ENV["FOOTBALL_API_MATCHES_PATH"].presence || DEFAULT_MATCHES_PATH,
+      live_path: ENV["FOOTBALL_API_LIVE_PATH"].presence || DEFAULT_LIVE_PATH,
       api_key: ENV["FOOTBALL_API_KEY"]
     )
       @base_url = base_url
@@ -39,6 +42,10 @@ module Football
     def incidents(event_id)
       payload = get_json("events/#{event_id}/incidents/")
       Array(payload["incidents"] || payload["results"] || payload["data"])
+    end
+
+    def stats(event_id)
+      get_json("events/#{event_id}/stats/")
     end
 
     def group_standings
