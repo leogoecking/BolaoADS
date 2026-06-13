@@ -34,16 +34,6 @@
     </div>
   </div>
 
-  <% if @match.live_clock_label.present? %>
-    <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-      <p class="text-xs font-black uppercase text-emerald-700">tempo do jogo</p>
-      <p class="text-lg font-black text-emerald-950"><%= @match.live_clock_label %></p>
-      <% if @match.last_synced_at.present? %>
-        <p class="muted">Atualizado em <%= l(@match.last_synced_at, format: :short) %></p>
-      <% end %>
-    </div>
-  <% end %>
-
   <div class="mt-5">
     <span class="status-pill <%= @match.open_for_predictions? || @match.live? ? "status-open" : "status-closed" %>"><%= @match.open_for_predictions? ? "Aberto pra corneta" : @match.status_label %></span>
   </div>
@@ -90,6 +80,12 @@
         <button type="button" class="button-secondary" data-modal-open="match-stats-modal">Ver estatisticas</button>
       <% end %>
       <button type="button" class="button-secondary" data-modal-open="match-predictions-modal">Ver palpites</button>
+      <button type="button" class="button" data-chat-open>
+        Resenha
+        <% if @match_messages.any? %>
+          <span class="ml-2 rounded-md bg-amber-300 px-2 py-0.5 text-xs font-black text-emerald-950"><%= @match_messages.size %></span>
+        <% end %>
+      </button>
     </div>
   </div>
 </div>
@@ -135,7 +131,7 @@
     <% end %>
   </div>
 
-  <% incidents = @match.live_incident_list.first(12) %>
+  <% incidents = @match.important_live_incidents %>
   <% if incidents.any? %>
     <div class="timeline-list">
       <% incidents.each do |incident| %>
@@ -156,6 +152,7 @@
 </div>
 
 <%= render "live_score_polling" %>
+<%= render "chat_drawer", match: @match, messages: @match_messages, message: @match_message %>
 
 <% content_for :body_scripts do %>
   <script>
@@ -175,6 +172,78 @@
         dialog.addEventListener("click", (event) => {
           if (event.target === dialog) dialog.close();
         });
+      });
+
+      const chatDrawer = document.getElementById("match-chat-drawer");
+      const chatOpen = document.querySelector("[data-chat-open]");
+      const chatClose = chatDrawer?.querySelector("[data-chat-close]");
+      const chatMessages = document.getElementById("match-chat-messages");
+      const chatForm = chatDrawer?.querySelector("[data-chat-form]");
+      const chatInput = chatForm?.querySelector("textarea");
+      let chatInterval = null;
+
+      async function refreshChat() {
+        if (!chatMessages || chatDrawer?.hidden) return;
+
+        const response = await fetch(chatMessages.dataset.chatMessagesUrl, {
+          headers: { "Accept": "text/html" },
+          cache: "no-store",
+          credentials: "same-origin"
+        });
+        if (response.ok) {
+          chatMessages.innerHTML = await response.text();
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }
+
+      function openChat() {
+        if (!chatDrawer) return;
+
+        chatDrawer.hidden = false;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        refreshChat();
+        chatInterval ||= window.setInterval(refreshChat, 5000);
+      }
+
+      function closeChat() {
+        if (!chatDrawer) return;
+
+        chatDrawer.hidden = true;
+        if (chatInterval) {
+          window.clearInterval(chatInterval);
+          chatInterval = null;
+        }
+      }
+
+      chatOpen?.addEventListener("click", openChat);
+      chatClose?.addEventListener("click", closeChat);
+
+      chatInput?.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+        if (chatInput.value.trim().length === 0) return;
+
+        event.preventDefault();
+        chatForm.requestSubmit();
+      });
+
+      chatForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const response = await fetch(chatForm.action, {
+          method: "POST",
+          body: new FormData(chatForm),
+          headers: {
+            "Accept": "text/html",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRF-Token": document.querySelector("meta[name='csrf-token']")?.content
+          },
+          credentials: "same-origin"
+        });
+
+        if (response.ok) {
+          chatMessages.innerHTML = await response.text();
+          chatForm.reset();
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
       });
     })();
   </script>

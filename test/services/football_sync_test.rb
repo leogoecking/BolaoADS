@@ -100,7 +100,8 @@ class FootballSyncTest < ActiveSupport::TestCase
     def incidents(_event_id)
       [
         { "minute" => 73, "type" => "goal", "text" => "Goal", "player" => "F. Balogun", "is_home" => true, "home_score" => 2, "away_score" => 1 },
-        { "minute" => 70, "type" => "card", "player" => "J. Hakimi", "is_home" => false, "card_type" => "yellow" }
+        { "minute" => 70, "type" => "card", "player" => "J. Hakimi", "is_home" => false, "card_type" => "yellow" },
+        { "minute" => 45, "type" => "injuryTime", "length" => 4 }
       ]
     end
   end
@@ -325,13 +326,14 @@ class FootballSyncTest < ActiveSupport::TestCase
     assert_equal "live", imported.status
     assert_equal 73, imported.current_minute
     assert_equal "2nd_half", imported.period
-    assert_equal "73' · 2nd_half", imported.live_clock_label
+    assert_equal "73' - 2T", imported.live_clock_label
     assert_equal "Goal", imported.live_incident_list.first["text"]
     assert_equal "F. Balogun", imported.live_incident_list.first["player"]
     assert_equal true, imported.live_incident_list.first["is_home"]
     assert_equal "Jogador: F. Balogun - Time: Brasil - 2 x 1", imported.incident_meta(imported.live_incident_list.first)
     assert_equal "Cartao amarelo", imported.incident_title(imported.live_incident_list.second)
     assert_equal "Jogador: J. Hakimi - Time: Marrocos", imported.incident_meta(imported.live_incident_list.second)
+    assert_equal 4, imported.live_incident_list.find { |incident| incident["type"] == "injuryTime" }["length"]
     assert imported.live_incidents_synced_at.present?
   end
 
@@ -344,6 +346,7 @@ class FootballSyncTest < ActiveSupport::TestCase
     assert_equal "live", imported.status
     assert_equal 74, imported.current_minute
     assert_equal "2nd_half", imported.period
+    assert_equal "74' - 2T", imported.live_clock_label
     assert_equal 2, imported.home_score
     assert_equal 1, imported.away_score
     assert_equal 2, incidents.size
@@ -363,6 +366,8 @@ class FootballSyncTest < ActiveSupport::TestCase
     game = match_record(status: "live")
     first_half = { "type" => "period", "text" => "First half", "minute" => 45, "home_score" => 1, "away_score" => 0 }
     halftime = { "type" => "period", "text" => "Half time", "minute" => 45, "home_score" => 1, "away_score" => 0 }
+    second_half = { "type" => "period", "text" => "Second half", "minute" => 45, "home_score" => 1, "away_score" => 0 }
+    game.update!(live_incidents: JSON.generate([first_half, halftime, second_half]))
 
     assert_equal "0'", game.incident_minute_label(first_half)
     assert_equal "Inicio do 1o tempo", game.incident_title(first_half)
@@ -370,6 +375,24 @@ class FootballSyncTest < ActiveSupport::TestCase
     assert_equal "45'", game.incident_minute_label(halftime)
     assert_equal "Intervalo", game.incident_title(halftime)
     assert_equal "Jogo no intervalo", game.incident_meta(halftime)
+    assert_equal "45'", game.incident_minute_label(second_half)
+    assert_equal "Inicio do 2o tempo", game.incident_title(second_half)
+    assert_equal [halftime], game.important_live_incidents
+  end
+
+  test "injury time incident enriches live clock and timeline" do
+    game = match_record(status: "live")
+    game.update!(
+      current_minute: 46,
+      period: "1st_half",
+      live_incidents: JSON.generate([{ "type" => "injuryTime", "minute" => 45, "length" => 5 }])
+    )
+    incident = game.live_incident_list.first
+
+    assert_equal "45+1' - 1T", game.live_clock_label
+    assert_equal "45'", game.incident_minute_label(incident)
+    assert_equal "Acrescimos", game.incident_title(incident)
+    assert_equal "+5 min de acrescimos", game.incident_meta(incident)
   end
 
   test "synchronizer preserves existing incidents when live incident fetch fails" do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_12_000100) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_13_000100) do
   create_table "achievements", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -34,6 +34,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_12_000100) do
     t.index ["match_id"], name: "index_activity_events_on_match_id"
     t.index ["prediction_id"], name: "index_activity_events_on_prediction_id"
     t.index ["user_id"], name: "index_activity_events_on_user_id"
+  end
+
+  create_table "match_messages", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "match_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_match_messages_on_created_at"
+    t.index ["match_id"], name: "index_match_messages_on_match_id"
+    t.index ["user_id"], name: "index_match_messages_on_user_id"
   end
 
   create_table "matches", force: :cascade do |t|
@@ -149,6 +160,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_12_000100) do
   add_foreign_key "activity_events", "matches"
   add_foreign_key "activity_events", "predictions"
   add_foreign_key "activity_events", "users"
+  add_foreign_key "match_messages", "matches"
+  add_foreign_key "match_messages", "users"
   add_foreign_key "matches", "teams", column: "away_team_id"
   add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "matches", "teams", column: "underdog_team_id"

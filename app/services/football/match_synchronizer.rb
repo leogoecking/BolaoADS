@@ -249,6 +249,8 @@ module Football
         "is_home" => incident["is_home"],
         "card_type" => value_from(incident["card_type"], incident["cardType"]),
         "goal_type" => value_from(incident["goal_type"], incident["goalType"]),
+        "length" => value_from(incident["length"], incident["injury_time"], incident["injuryTime"]),
+        "added_time" => value_from(incident["added_time"], incident["addedTime"]),
         "home_score" => value_from(incident["home_score"], incident["homeScore"], incident_value(incident, "score", "home")),
         "away_score" => value_from(incident["away_score"], incident["awayScore"], incident_value(incident, "score", "away"))
       }.compact

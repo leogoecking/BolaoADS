@@ -40,5 +40,7 @@ class MatchesController < ApplicationController
     @prediction = current_user.predictions.find_or_initialize_by(match: @match)
     @revealed_predictions = @match.predictions.includes(:user).order("users.name") if @match.predictions_revealed?
     @live_stats = Football::LiveMatchStats.new(@match).call if @match.live? || @match.finished?
+    @match_messages = @match.recent_match_messages
+    @match_message = MatchMessage.new
   end
 end

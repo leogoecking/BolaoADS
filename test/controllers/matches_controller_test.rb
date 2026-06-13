@@ -137,6 +137,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "Ver palpites"
+    assert_includes response.body, "Resenha"
+    assert_includes response.body, "match-chat-drawer"
     assert_includes response.body, "Palpites secretos"
     assert_not_includes response.body, "Carlos"
     assert_not_includes response.body, "4 x 4"

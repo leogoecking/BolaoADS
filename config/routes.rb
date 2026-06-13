@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     end
 
     resource :prediction, only: %i[create update]
+    resources :messages, controller: :match_messages, only: %i[index create]
   end
 
   resources :predictions, only: [] do

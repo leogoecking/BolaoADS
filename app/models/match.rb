@@ -6,6 +6,7 @@ class Match < ApplicationRecord
   belongs_to :underdog_team, class_name: "Team", optional: true
   has_many :predictions, dependent: :destroy
   has_many :activity_events, dependent: :destroy
+  has_many :match_messages, dependent: :destroy
 
   validates :external_id, presence: true, uniqueness: true
   validates :kickoff_at, presence: true
@@ -42,10 +43,33 @@ class Match < ApplicationRecord
     []
   end
 
+  def recent_match_messages(limit: 60)
+    match_messages.includes(:user).latest_window(limit).to_a.reverse
+  end
+
+  def important_live_incidents(limit: 12)
+    live_incident_list.reject { |incident| period_start_incident?(incident) }.first(limit)
+  end
+
   def live_clock_label
     return nil if current_minute.blank? && period.blank?
 
-    [ current_minute.present? ? "#{current_minute}'" : nil, period.presence ].compact.join(" · ")
+    [ live_minute_label, localized_period.presence ].compact.join(" - ")
+  end
+
+  def localized_period
+    case period.to_s.downcase
+    when "1st_half", "first_half", "first half", "1h", "1t"
+      "1T"
+    when "2nd_half", "second_half", "second half", "2h", "2t"
+      "2T"
+    when "halftime", "half_time", "half time", "ht", "interval"
+      "Intervalo"
+    when "extra_time", "extra time", "et"
+      "Prorrogacao"
+    else
+      period
+    end
   end
 
   def score_label
@@ -68,6 +92,7 @@ class Match < ApplicationRecord
 
   def incident_meta(incident)
     return incident_period_meta(incident) if incident["type"].to_s == "period"
+    return incident_injury_time_meta(incident) if incident["type"].to_s == "injuryTime"
 
     [
       incident_player_label(incident),
@@ -78,6 +103,7 @@ class Match < ApplicationRecord
 
   def incident_minute_label(incident)
     return "0'" if first_half_start_incident?(incident)
+    return "45'" if second_half_start_incident?(incident)
 
     incident["minute"].present? ? "#{incident["minute"]}'" : "--"
   end
@@ -96,6 +122,8 @@ class Match < ApplicationRecord
       "Substituicao"
     when "period"
       "Periodo"
+    when "injuryTime"
+      "Acrescimos"
     else
       type.humanize.presence
     end
@@ -143,6 +171,42 @@ class Match < ApplicationRecord
 
   def first_half_start_incident?(incident)
     incident["type"].to_s == "period" && incident["text"].to_s.downcase.include?("first half")
+  end
+
+  def second_half_start_incident?(incident)
+    incident["type"].to_s == "period" && incident["text"].to_s.downcase.include?("second half")
+  end
+
+  def period_start_incident?(incident)
+    first_half_start_incident?(incident) || second_half_start_incident?(incident)
+  end
+
+  def incident_injury_time_meta(incident)
+    length = incident["length"].to_i
+    return if length <= 0
+
+    "+#{length} min de acrescimos"
+  end
+
+  def live_minute_label
+    return if current_minute.blank?
+
+    stoppage = active_stoppage_time
+    return "#{stoppage[:base]}+#{stoppage[:elapsed]}'" if stoppage
+
+    "#{current_minute}'"
+  end
+
+  def active_stoppage_time
+    injury_time = live_incident_list.find { |incident| incident["type"].to_s == "injuryTime" }
+    length = injury_time&.dig("length").to_i
+    return if injury_time.blank? || length <= 0
+
+    base = localized_period == "2T" ? 90 : 45
+    elapsed = current_minute.to_i - base
+    return if elapsed <= 0
+
+    { base: base, elapsed: [ elapsed, length ].min }
   end
 
   def score_predictions

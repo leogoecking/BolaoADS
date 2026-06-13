@@ -1,0 +1,19 @@
+<aside id="match-chat-drawer" class="match-chat-drawer" hidden aria-label="Resenha da partida">
+  <div class="match-chat-header">
+    <div class="min-w-0">
+      <p class="page-kicker">resenha</p>
+      <h2 class="text-xl font-black text-slate-950">Chat do jogo</h2>
+      <p class="muted"><%= match.home_team.name %> x <%= match.away_team.name %></p>
+    </div>
+    <button type="button" class="match-chat-close" data-chat-close aria-label="Fechar">x</button>
+  </div>
+
+  <div id="match-chat-messages" class="match-chat-body" data-chat-messages-url="<%= match_messages_path(match) %>">
+    <%= render "chat_messages", messages: messages %>
+  </div>
+
+  <%= form_with model: [match, message], url: match_messages_path(match), class: "match-chat-form", data: { chat_form: true } do |form| %>
+    <%= form.text_area :body, rows: 2, maxlength: 280, placeholder: "Mande sua resenha...", required: true %>
+    <%= form.submit "Enviar" %>
+  <% end %>
+</aside>
