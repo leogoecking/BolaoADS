@@ -14,7 +14,16 @@
         <% reaction_counts = event.reaction_counts %>
         <% reacted_types = event.activity_event_reactions.select { |reaction| reaction.user_id == current_user.id }.map(&:reaction_type) %>
         <article class="activity-item">
-          <div class="activity-icon"><%= { "exact_score" => "3", "leader_changed" => "1", "ranking_drop" => "-", "only_believer" => "1", "no_hits" => "0", "big_climb" => "+", "underdog_hit" => "Z" }[event.event_type] || "!" %></div>
+          <% activity_icon = {
+            "exact_score" => [ "🎯", "Placar exato" ],
+            "leader_changed" => [ "👑", "Novo lider" ],
+            "ranking_drop" => [ "📉", "Queda no ranking" ],
+            "only_believer" => [ "🙋", "Unico pontuador" ],
+            "no_hits" => [ "😵", "Ninguem cravou" ],
+            "big_climb" => [ "🚀", "Maior subida" ],
+            "underdog_hit" => [ "⚡", "Acerto de zebra" ]
+          }.fetch(event.event_type, [ "💬", "Atividade" ]) %>
+          <div class="activity-icon" title="<%= activity_icon.second %>" aria-label="<%= activity_icon.second %>"><%= activity_icon.first %></div>
           <div class="activity-body">
             <div class="activity-meta">
               <span><%= l(event.created_at, format: :short) %></span>
