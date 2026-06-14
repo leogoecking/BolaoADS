@@ -245,6 +245,8 @@ module Football
         "type" => value_from(incident["type"], incident["incident_type"], incident["incidentType"], incident["category"]),
         "text" => value_from(incident["text"], incident["description"], incident["detail"], incident["label"]),
         "player" => value_from(incident["player"], incident["player_name"], incident["playerName"], incident_value(incident, "player", "name")),
+        "player_in" => substitution_player_in(incident),
+        "player_out" => substitution_player_out(incident),
         "player_id" => value_from(incident["player_id"], incident["playerId"], incident_value(incident, "player", "id")),
         "is_home" => incident["is_home"],
         "card_type" => value_from(incident["card_type"], incident["cardType"]),
@@ -260,6 +262,46 @@ module Football
       incident.respond_to?(:dig) ? incident.dig(*keys) : nil
     rescue TypeError
       nil
+    end
+
+    def substitution_player_in(incident)
+      value_from(
+        incident_value(incident, "player_in", "name"),
+        incident_value(incident, "playerIn", "name"),
+        incident_value(incident, "in_player", "name"),
+        incident_value(incident, "inPlayer", "name"),
+        incident_value(incident, "player_on", "name"),
+        incident_value(incident, "playerOn", "name"),
+        incident_value(incident, "assist", "name"),
+        incident["player_in"],
+        incident["playerIn"],
+        incident["in_player"],
+        incident["inPlayer"],
+        incident["player_on"],
+        incident["playerOn"],
+        incident["sub_in"],
+        incident["subIn"]
+      )
+    end
+
+    def substitution_player_out(incident)
+      value_from(
+        incident_value(incident, "player_out", "name"),
+        incident_value(incident, "playerOut", "name"),
+        incident_value(incident, "out_player", "name"),
+        incident_value(incident, "outPlayer", "name"),
+        incident_value(incident, "player_off", "name"),
+        incident_value(incident, "playerOff", "name"),
+        incident_value(incident, "player", "name"),
+        incident["player_out"],
+        incident["playerOut"],
+        incident["out_player"],
+        incident["outPlayer"],
+        incident["player_off"],
+        incident["playerOff"],
+        incident["sub_out"],
+        incident["subOut"]
+      )
     end
 
     def normalized_minute(value)

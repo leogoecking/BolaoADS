@@ -101,6 +101,7 @@ class FootballSyncTest < ActiveSupport::TestCase
       [
         { "minute" => 73, "type" => "goal", "text" => "Goal", "player" => "F. Balogun", "is_home" => true, "home_score" => 2, "away_score" => 1 },
         { "minute" => 70, "type" => "card", "player" => "J. Hakimi", "is_home" => false, "card_type" => "yellow" },
+        { "minute" => 69, "type" => "substitution", "player_in" => { "name" => "Endrick" }, "player_out" => { "name" => "Vini Jr." }, "is_home" => true },
         { "minute" => 45, "type" => "injuryTime", "length" => 4 }
       ]
     end
@@ -333,6 +334,8 @@ class FootballSyncTest < ActiveSupport::TestCase
     assert_equal "Jogador: F. Balogun - Time: Brasil - 2 x 1", imported.incident_meta(imported.live_incident_list.first)
     assert_equal "Cartao amarelo", imported.incident_title(imported.live_incident_list.second)
     assert_equal "Jogador: J. Hakimi - Time: Marrocos", imported.incident_meta(imported.live_incident_list.second)
+    assert_equal "Substituicao", imported.incident_title(imported.live_incident_list.third)
+    assert_equal "Entrou: Endrick - Saiu: Vini Jr. - Time: Brasil", imported.incident_meta(imported.live_incident_list.third)
     assert_equal 4, imported.live_incident_list.find { |incident| incident["type"] == "injuryTime" }["length"]
     assert imported.live_incidents_synced_at.present?
   end

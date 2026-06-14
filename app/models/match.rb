@@ -93,6 +93,7 @@ class Match < ApplicationRecord
   def incident_meta(incident)
     return incident_period_meta(incident) if incident["type"].to_s == "period"
     return incident_injury_time_meta(incident) if incident["type"].to_s == "injuryTime"
+    return incident_substitution_meta(incident) if incident["type"].to_s == "substitution"
 
     [
       incident_player_label(incident),
@@ -133,6 +134,30 @@ class Match < ApplicationRecord
     return if incident["player"].blank?
 
     "Jogador: #{incident["player"]}"
+  end
+
+  def incident_substitution_meta(incident)
+    labels = [
+      incident_player_in_label(incident),
+      incident_player_out_label(incident),
+      incident_team_label(incident)
+    ].compact
+
+    return labels.join(" - ") if labels.any?
+
+    incident_team_label(incident)
+  end
+
+  def incident_player_in_label(incident)
+    return if incident["player_in"].blank?
+
+    "Entrou: #{incident["player_in"]}"
+  end
+
+  def incident_player_out_label(incident)
+    return if incident["player_out"].blank?
+
+    "Saiu: #{incident["player_out"]}"
   end
 
   def incident_team_label(incident)
