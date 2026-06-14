@@ -3,6 +3,8 @@ class User < ApplicationRecord
 
   has_many :predictions, dependent: :destroy
   has_many :activity_events, dependent: :destroy
+  has_many :activity_event_comments, dependent: :destroy
+  has_many :activity_event_reactions, dependent: :destroy
   has_many :prediction_comments, dependent: :destroy
   has_many :match_messages, dependent: :destroy
   has_many :user_achievements, dependent: :destroy

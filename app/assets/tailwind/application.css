@@ -237,6 +237,18 @@
     @apply mt-3 flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm;
   }
 
+  .reaction-list {
+    @apply mt-3 flex flex-wrap gap-2;
+  }
+
+  .reaction-button {
+    @apply inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-black text-slate-600 shadow-sm transition hover:bg-amber-50 hover:text-slate-950;
+  }
+
+  .reaction-button-active {
+    @apply border-amber-300 bg-amber-300 text-emerald-950 hover:bg-amber-200;
+  }
+
   .comment-list {
     @apply mt-3 grid gap-2;
   }

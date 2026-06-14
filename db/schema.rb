@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_13_000100) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_14_000200) do
   create_table "achievements", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -18,6 +18,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_000100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_achievements_on_key", unique: true
+  end
+
+  create_table "activity_event_comments", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "activity_event_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_event_id"], name: "index_activity_event_comments_on_activity_event_id"
+    t.index ["created_at"], name: "index_activity_event_comments_on_created_at"
+    t.index ["user_id"], name: "index_activity_event_comments_on_user_id"
+  end
+
+  create_table "activity_event_reactions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "activity_event_id", null: false
+    t.string "reaction_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_event_id"], name: "index_activity_event_reactions_on_activity_event_id"
+    t.index ["created_at"], name: "index_activity_event_reactions_on_created_at"
+    t.index ["user_id", "activity_event_id", "reaction_type"], name: "idx_on_user_id_activity_event_id_reaction_type_a51fa9e44e", unique: true
+    t.index ["user_id"], name: "index_activity_event_reactions_on_user_id"
   end
 
   create_table "activity_events", force: :cascade do |t|
@@ -157,6 +180,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_000100) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "activity_event_comments", "activity_events"
+  add_foreign_key "activity_event_comments", "users"
+  add_foreign_key "activity_event_reactions", "activity_events"
+  add_foreign_key "activity_event_reactions", "users"
   add_foreign_key "activity_events", "matches"
   add_foreign_key "activity_events", "predictions"
   add_foreign_key "activity_events", "users"

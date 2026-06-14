@@ -11,8 +11,10 @@
     <div class="activity-list">
       <% activity_events.each do |event| %>
         <% prediction = event.prediction %>
+        <% reaction_counts = event.reaction_counts %>
+        <% reacted_types = event.activity_event_reactions.select { |reaction| reaction.user_id == current_user.id }.map(&:reaction_type) %>
         <article class="activity-item">
-          <div class="activity-icon"><%= { "exact_score" => "3", "leader_changed" => "1", "ranking_drop" => "-" }[event.event_type] || "!" %></div>
+          <div class="activity-icon"><%= { "exact_score" => "3", "leader_changed" => "1", "ranking_drop" => "-", "only_believer" => "1", "no_hits" => "0", "big_climb" => "+", "underdog_hit" => "Z" }[event.event_type] || "!" %></div>
           <div class="activity-body">
             <div class="activity-meta">
               <span><%= l(event.created_at, format: :short) %></span>
@@ -27,20 +29,34 @@
                 <span class="score-pill"><%= prediction.home_score %> x <%= prediction.away_score %></span>
                 <span class="font-black text-emerald-800"><%= prediction.points %> pts</span>
               </div>
+            <% end %>
 
-              <div class="comment-list">
-                <% prediction.prediction_comments.sort_by(&:created_at).each do |comment| %>
-                  <div class="comment-item">
-                    <strong><%= comment.user.name %></strong>
-                    <span><%= comment.body %></span>
-                  </div>
+            <div class="reaction-list">
+              <% ActivityEventReaction::REACTION_TYPES.each do |reaction_type| %>
+                <% reacted = reacted_types.include?(reaction_type) %>
+                <% label = { "kkkk" => "😂 kkkk", "cornetou" => "📣 cornetou", "zicou" => "🧿 zicou", "genio" => "🧠 genio", "pipocou" => "🍿 pipocou" }.fetch(reaction_type) %>
+                <%= button_to activity_event_reaction_path(event, reaction_type: reaction_type),
+                      method: reacted ? :delete : :post,
+                      class: "reaction-button #{'reaction-button-active' if reacted}",
+                      title: reacted ? "Remover #{label}" : "Reagir com #{label}" do %>
+                  <span><%= label %></span>
+                  <strong><%= reaction_counts.fetch(reaction_type, 0) %></strong>
                 <% end %>
-              </div>
-
-              <%= form_with model: [prediction, PredictionComment.new], url: prediction_comments_path(prediction), class: "comment-form" do |form| %>
-                <%= form.text_field :body, maxlength: 280, required: true, placeholder: "Comente esse palpite" %>
-                <%= form.submit "Comentar" %>
               <% end %>
+            </div>
+
+            <div class="comment-list">
+              <% event.activity_event_comments.sort_by(&:created_at).each do |comment| %>
+                <div class="comment-item">
+                  <strong><%= comment.user.name %></strong>
+                  <span><%= comment.body %></span>
+                </div>
+              <% end %>
+            </div>
+
+            <%= form_with model: [event, ActivityEventComment.new], url: activity_event_comments_path(event), class: "comment-form" do |form| %>
+              <%= form.text_field :body, maxlength: 280, required: true, placeholder: "Mandar resenha" %>
+              <%= form.submit "Resenhar" %>
             <% end %>
           </div>
         </article>
