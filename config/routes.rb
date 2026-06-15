@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   end
 
   resource :ranking, only: :show
+  resource :mural, only: :show
   resource :achievements, only: :show
   resources :special_predictions, only: %i[index create update]
 

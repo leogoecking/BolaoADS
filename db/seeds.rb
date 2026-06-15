@@ -4,6 +4,10 @@ franca = Team.find_or_create_by!(code: "FRA") { |team| team.name = "França" }
 franca.update!(name: "França") if franca.name != "França"
 alemanha = Team.find_or_create_by!(code: "ALE") { |team| team.name = "Alemanha" }
 
+%w[seed-fra-ale].each do |external_id|
+  Match.find_by(external_id: external_id)&.destroy!
+end
+
 Match.find_or_create_by!(external_id: "seed-bra-arg") do |match|
   match.home_team = brasil
   match.away_team = argentina
@@ -12,16 +16,6 @@ Match.find_or_create_by!(external_id: "seed-bra-arg") do |match|
   match.stage = "Fase de grupos"
   match.group_name = "Grupo A"
   match.underdog_team = argentina
-end
-
-Match.find_or_create_by!(external_id: "seed-fra-ale") do |match|
-  match.home_team = franca
-  match.away_team = alemanha
-  match.kickoff_at = 3.days.from_now
-  match.status = "scheduled"
-  match.stage = "Fase de grupos"
-  match.group_name = "Grupo B"
-  match.underdog_team = alemanha
 end
 
 Achievement.ensure_catalog!

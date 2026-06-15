@@ -21,13 +21,14 @@
         <% if signed_in? %>
           <div class="topbar-menu">
             <nav class="nav-list">
+              <%= link_to "💬 Mural", mural_path, class: "nav-link" %>
               <%= link_to "⚽ Jogos", matches_path, class: "nav-link" %>
               <%= link_to "📅 Calendário", calendar_matches_path, class: "nav-link" %>
               <%= link_to "📊 Grupos", groups_matches_path, class: "nav-link" %>
               <%= link_to "🏆 Ranking", ranking_path, class: "nav-link" %>
               <%= link_to "🔮 Especiais", special_predictions_path, class: "nav-link" %>
               <%= link_to "🔥 Conquistas", achievements_path, class: "nav-link" %>
-              <%= link_to "Chaveamento", bracket_matches_path, class: "nav-link" %>
+              <%= link_to "🗂️ Chaveamento", bracket_matches_path, class: "nav-link" %>
             </nav>
             <div class="account-bar">
               <span class="coin-chip">🪙 <%= current_user.adcoins_balance %> ADcoins</span>

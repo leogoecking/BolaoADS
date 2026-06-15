@@ -9,9 +9,9 @@ class ActivityEventReactionsController < ApplicationController
     )
 
     if reaction.persisted? || reaction.save
-      redirect_to matches_path(anchor: "mural"), notice: "Reacao registrada."
+      redirect_to mural_path(anchor: "mural"), notice: "Reacao registrada."
     else
-      redirect_to matches_path(anchor: "mural"), alert: reaction.errors.full_messages.to_sentence
+      redirect_to mural_path(anchor: "mural"), alert: reaction.errors.full_messages.to_sentence
     end
   end
 
@@ -20,7 +20,7 @@ class ActivityEventReactionsController < ApplicationController
       .where(user: current_user, reaction_type: reaction_type)
       .destroy_all
 
-    redirect_to matches_path(anchor: "mural"), notice: "Reacao removida."
+    redirect_to mural_path(anchor: "mural"), notice: "Reacao removida."
   end
 
   private

@@ -24,7 +24,7 @@ class PredictionCommentsControllerTest < ActionDispatch::IntegrationTest
       post prediction_comments_path(prediction), params: { prediction_comment: { body: "Boa cravada" } }
     end
 
-    assert_redirected_to matches_path(anchor: "mural")
+    assert_redirected_to mural_path(anchor: "mural")
   end
 
   test "rejects comment on hidden prediction" do
@@ -39,6 +39,6 @@ class PredictionCommentsControllerTest < ActionDispatch::IntegrationTest
       post prediction_comments_path(prediction), params: { prediction_comment: { body: "Boa cravada" } }
     end
 
-    assert_redirected_to matches_path(anchor: "mural")
+    assert_redirected_to mural_path(anchor: "mural")
   end
 end

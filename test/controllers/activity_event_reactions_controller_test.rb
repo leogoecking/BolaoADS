@@ -23,7 +23,7 @@ class ActivityEventReactionsControllerTest < ActionDispatch::IntegrationTest
       post activity_event_reaction_path(event, reaction_type: "kkkk")
     end
 
-    assert_redirected_to matches_path(anchor: "mural")
+    assert_redirected_to mural_path(anchor: "mural")
   end
 
   test "removes current user reaction" do
@@ -40,7 +40,7 @@ class ActivityEventReactionsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert ActivityEventReaction.exists?(user: other, activity_event: event, reaction_type: "zicou")
-    assert_redirected_to matches_path(anchor: "mural")
+    assert_redirected_to mural_path(anchor: "mural")
   end
 
   private

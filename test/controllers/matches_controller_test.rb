@@ -63,7 +63,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "Jogos"
-    assert_includes response.body, "Atividades do bolao"
+    assert_not_includes response.body, "Atividades do bolao"
   end
 
   test "separates today and upcoming matches on index" do

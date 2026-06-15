@@ -1,11 +1,13 @@
 <section id="mural" class="match-section">
-  <div class="section-heading">
-    <div>
-      <p class="page-kicker">Mural</p>
-      <h2>Atividades do bolao</h2>
+  <% if local_assigns.fetch(:show_heading, true) %>
+    <div class="section-heading">
+      <div>
+        <p class="page-kicker">💬 Mural</p>
+        <h2>Atividades do bolao</h2>
+      </div>
+      <span class="count-pill"><%= activity_events.size %></span>
     </div>
-    <span class="count-pill"><%= activity_events.size %></span>
-  </div>
+  <% end %>
 
   <% if activity_events.any? %>
     <div class="activity-list">

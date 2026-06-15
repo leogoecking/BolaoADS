@@ -19,7 +19,7 @@ class ActivityEventCommentsControllerTest < ActionDispatch::IntegrationTest
       post activity_event_comments_path(event), params: { activity_event_comment: { body: "Corneta registrada" } }
     end
 
-    assert_redirected_to matches_path(anchor: "mural")
+    assert_redirected_to mural_path(anchor: "mural")
   end
 
   test "rejects invalid comment" do
@@ -32,7 +32,7 @@ class ActivityEventCommentsControllerTest < ActionDispatch::IntegrationTest
       post activity_event_comments_path(event), params: { activity_event_comment: { body: "" } }
     end
 
-    assert_redirected_to matches_path(anchor: "mural")
+    assert_redirected_to mural_path(anchor: "mural")
   end
 
   private

@@ -6,9 +6,9 @@ class ActivityEventCommentsController < ApplicationController
     @comment = @activity_event.activity_event_comments.new(comment_params.merge(user: current_user))
 
     if @comment.save
-      redirect_to matches_path(anchor: "mural"), notice: "Resenha publicada."
+      redirect_to mural_path(anchor: "mural"), notice: "Resenha publicada."
     else
-      redirect_to matches_path(anchor: "mural"), alert: @comment.errors.full_messages.to_sentence
+      redirect_to mural_path(anchor: "mural"), alert: @comment.errors.full_messages.to_sentence
     end
   end
 
