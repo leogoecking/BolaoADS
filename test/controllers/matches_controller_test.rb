@@ -86,7 +86,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   test "shows full calendar grouped by stage" do
     player = user
     game = match_record(kickoff_at: 1.day.from_now)
-    game.update!(group_name: "Group A")
+    venue = Venue.create!(external_id: "1182", name: "MetLife Stadium", city: "East Rutherford", country: "USA")
+    game.update!(group_name: "Group A", round_number: 1, venue: venue, weather: JSON.generate({ "temperature_c" => 22 }))
 
     post session_path, params: { email: player.email, password: "secret123" }
     get calendar_matches_path
@@ -94,6 +95,21 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Todos os jogos"
     assert_includes response.body, "Group A"
+    assert_includes response.body, "Rodada 1"
+    assert_includes response.body, "MetLife Stadium"
+  end
+
+  test "shows knockout bracket page" do
+    player = user
+    game = match_record(kickoff_at: 1.day.from_now)
+    game.update!(round_name: "Final", stage: "Final")
+
+    post session_path, params: { email: player.email, password: "secret123" }
+    get bracket_matches_path
+
+    assert_response :success
+    assert_includes response.body, "Chaveamento"
+    assert_includes response.body, "Final"
   end
 
   test "shows groups page with fallback when standings are empty" do

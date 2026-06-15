@@ -11,9 +11,24 @@ class FootballSyncTest < ActiveSupport::TestCase
           "away_team_id" => 464,
           "away_team" => "Morocco",
           "event_date" => "2026-06-11T19:00:00Z",
-          "status" => "notstarted"
+          "status" => "notstarted",
+          "round_number" => 1,
+          "group_name" => "Group A",
+          "venue_id" => 1182,
+          "weather" => { "temperature_c" => 26, "wind_speed" => 7.3 },
+          "is_neutral_ground" => true
         }
       ]
+    end
+
+    def venue(_venue_id)
+      {
+        "id" => 1182,
+        "name" => "MetLife Stadium",
+        "city" => "East Rutherford",
+        "country" => "USA",
+        "capacity" => 82500
+      }
     end
   end
 
@@ -227,6 +242,12 @@ class FootballSyncTest < ActiveSupport::TestCase
     assert_equal "Brasil", imported.home_team.name
     assert_equal "Marrocos", imported.away_team.name
     assert_equal "scheduled", imported.status
+    assert_equal "Fase de grupos", imported.stage
+    assert_equal "Group A", imported.group_name
+    assert_equal 1, imported.round_number
+    assert_equal true, imported.is_neutral_ground
+    assert_equal "MetLife Stadium", imported.venue.name
+    assert_equal "26°C - 7.3 km/h vento", imported.weather_label
   end
 
   test "api football payloads are normalized and imported" do
@@ -436,5 +457,32 @@ class FootballSyncTest < ActiveSupport::TestCase
 
     assert_equal "Alemanha", Team.find_by!(code: "BSD-467").name
     assert_equal "Japão", Team.find_by!(code: "BSD-470").name
+  end
+
+  test "synchronizer prefers external team id over tla code" do
+    existing = Team.create!(code: "ARG", name: "Argentina")
+
+    Football::MatchSynchronizer.new(client: Class.new do
+      def matches
+        [
+          {
+            "id" => "fixture-arg-sco",
+            "home_team_id" => 466,
+            "home_team" => { "name" => "Argentina", "tla" => "ARG" },
+            "away_team_id" => 473,
+            "away_team" => { "name" => "Scotland", "tla" => "SCO" },
+            "event_date" => "2026-06-12T19:00:00Z",
+            "status" => "notstarted",
+            "group_name" => "Group C"
+          }
+        ]
+      end
+    end.new).call
+
+    assert_equal existing.id, Team.find_by!(code: "BSD-466").id
+    assert_equal "Argentina", Team.find_by!(code: "BSD-466").name
+    assert_equal "Escócia", Team.find_by!(code: "BSD-473").name
+    assert_nil Team.find_by(code: "ARG")
+    assert_nil Team.find_by(code: "SCO")
   end
 end

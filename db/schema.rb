@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_14_000200) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_14_000400) do
   create_table "achievements", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -89,13 +89,31 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_14_000200) do
     t.string "period"
     t.text "live_incidents", default: "[]", null: false
     t.datetime "live_incidents_synced_at"
+    t.integer "venue_id"
+    t.string "round_name"
+    t.integer "round_number"
+    t.boolean "is_neutral_ground", default: false, null: false
+    t.integer "travel_distance_km"
+    t.text "weather", default: "{}", null: false
+    t.string "pitch_condition"
+    t.integer "attendance"
+    t.integer "home_score_ht"
+    t.integer "away_score_ht"
+    t.text "extra_time_score"
+    t.text "penalty_shootout"
+    t.integer "home_coach_id"
+    t.integer "away_coach_id"
+    t.integer "referee_id"
     t.index ["away_team_id"], name: "index_matches_on_away_team_id"
     t.index ["external_id"], name: "index_matches_on_external_id", unique: true
     t.index ["home_team_id"], name: "index_matches_on_home_team_id"
     t.index ["kickoff_at"], name: "index_matches_on_kickoff_at"
     t.index ["knockout"], name: "index_matches_on_knockout"
+    t.index ["round_name"], name: "index_matches_on_round_name"
+    t.index ["round_number"], name: "index_matches_on_round_number"
     t.index ["status"], name: "index_matches_on_status"
     t.index ["underdog_team_id"], name: "index_matches_on_underdog_team_id"
+    t.index ["venue_id"], name: "index_matches_on_venue_id"
   end
 
   create_table "prediction_comments", force: :cascade do |t|
@@ -180,6 +198,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_14_000200) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "venues", force: :cascade do |t|
+    t.string "external_id", null: false
+    t.string "name", null: false
+    t.string "city"
+    t.string "country"
+    t.integer "capacity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_venues_on_external_id", unique: true
+  end
+
   add_foreign_key "activity_event_comments", "activity_events"
   add_foreign_key "activity_event_comments", "users"
   add_foreign_key "activity_event_reactions", "activity_events"
@@ -192,6 +221,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_14_000200) do
   add_foreign_key "matches", "teams", column: "away_team_id"
   add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "matches", "teams", column: "underdog_team_id"
+  add_foreign_key "matches", "venues"
   add_foreign_key "prediction_comments", "predictions"
   add_foreign_key "prediction_comments", "users"
   add_foreign_key "predictions", "matches"

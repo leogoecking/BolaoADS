@@ -339,19 +339,83 @@
   }
 
   .group-card h3 {
-    @apply mb-3 text-lg font-black text-slate-950;
+    @apply mb-3 text-base font-black text-slate-950;
+  }
+
+  .group-table-wrap {
+    @apply -mx-2 overflow-x-auto px-2;
   }
 
   .group-table {
-    @apply w-full border-collapse text-sm;
+    @apply w-full min-w-[29rem] border-separate border-spacing-y-1 text-xs;
+    table-layout: fixed;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .group-table-rank {
+    width: 2rem;
+  }
+
+  .group-table-team {
+    width: 9.5rem;
+  }
+
+  .group-table-stat {
+    width: 3rem;
+  }
+
+  .group-table-record {
+    width: 4rem;
   }
 
   .group-table th {
-    @apply border-b border-slate-200 pb-2 text-left text-xs font-black uppercase text-slate-500;
+    @apply px-1.5 pb-2 text-center text-xs font-black uppercase text-slate-500;
+    white-space: nowrap;
+  }
+
+  .group-table th:nth-child(2) {
+    @apply text-left;
   }
 
   .group-table td {
-    @apply border-b border-slate-100 py-2 align-middle;
+    @apply border-b border-slate-100 px-1.5 py-2 text-center align-middle;
+    white-space: nowrap;
+  }
+
+  .group-table td:nth-child(2) {
+    @apply text-left;
+  }
+
+  .group-team-inline {
+    @apply min-w-0 max-w-full;
+  }
+
+  .group-team-name {
+    @apply min-w-0 truncate;
+  }
+
+  .bracket-board {
+    @apply grid gap-4 xl:grid-cols-3;
+  }
+
+  .bracket-round {
+    @apply min-w-0 rounded-lg border border-white/80 bg-white/95 p-4 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5;
+  }
+
+  .bracket-match-list {
+    @apply grid gap-3;
+  }
+
+  .bracket-match {
+    @apply block rounded-lg border border-slate-200 bg-slate-50 p-3 text-slate-950 shadow-sm transition hover:border-amber-300 hover:bg-amber-50 hover:text-slate-950;
+  }
+
+  .bracket-teams {
+    @apply grid gap-1 text-sm font-black text-slate-950;
+  }
+
+  .bracket-teams strong {
+    @apply inline-flex w-fit rounded-md bg-emerald-950 px-2 py-1 text-xs text-amber-300;
   }
 
   .stadium-score {

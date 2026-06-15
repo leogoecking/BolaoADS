@@ -1,30 +1,45 @@
 <div class="group-card">
   <h3><%= group_name %></h3>
-  <table class="group-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Seleção</th>
-        <th>J</th>
-        <th>SG</th>
-        <th>Pts</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% rows.each do |row| %>
+  <div class="group-table-wrap">
+    <table class="group-table" aria-label="Classificacao do <%= group_name %>">
+      <colgroup>
+        <col class="group-table-rank">
+        <col class="group-table-team">
+        <col class="group-table-stat">
+        <col class="group-table-record">
+        <col class="group-table-record">
+        <col class="group-table-stat">
+        <col class="group-table-stat">
+      </colgroup>
+      <thead>
         <tr>
-          <td><%= row[:position] %></td>
-          <td>
-            <span class="team-inline">
-              <%= image_tag bsd_team_logo_url(row[:team_id]), class: "team-logo small", alt: "", onerror: "this.style.display='none'" %>
-              <%= row[:team_name] %>
-            </span>
-          </td>
-          <td><%= row[:played] %></td>
-          <td><%= row[:goal_difference] %></td>
-          <td class="font-black text-slate-950"><%= row[:points] %></td>
+          <th>#</th>
+          <th>Selecao</th>
+          <th>J</th>
+          <th>V-E-D</th>
+          <th>Gols</th>
+          <th>SG</th>
+          <th>Pts</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% rows.each do |row| %>
+          <tr class="<%= 'bg-emerald-50' if row[:live] %>">
+            <td><%= row[:position] %></td>
+            <td>
+              <span class="team-inline group-team-inline">
+                <%= image_tag bsd_team_logo_url(row[:team_id]), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if bsd_team_logo_url(row[:team_id]) %>
+                <span class="group-team-name"><%= row[:team_name] %></span>
+              </span>
+            </td>
+            <td><%= row[:played] %></td>
+            <td><%= [row[:won], row[:drawn], row[:lost]].join("-") %></td>
+            <td><%= [row[:goals_for], row[:goals_against]].join("-") %></td>
+            <td><%= row[:goal_difference] %></td>
+            <td class="font-black text-slate-950"><%= row[:points] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

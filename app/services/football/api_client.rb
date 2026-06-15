@@ -48,6 +48,10 @@ module Football
       get_json("events/#{event_id}/stats/")
     end
 
+    def venue(venue_id)
+      get_json("venues/#{venue_id}/")
+    end
+
     def group_standings
       get_json(ENV.fetch("FOOTBALL_API_STANDINGS_PATH", "leagues/27/standings/?season_id=188"))
     end

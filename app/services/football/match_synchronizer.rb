@@ -68,6 +68,7 @@ module Football
     def initialize(client: ClientFactory.build, live_only: false)
       @client = client
       @live_only = live_only
+      @venues_by_external_id = {}
     end
 
     def call
@@ -96,14 +97,29 @@ module Football
       match.assign_attributes(
         home_team: home_team,
         away_team: away_team,
+        venue: venue_for(payload),
         kickoff_at: kickoff,
         status: status(payload),
         home_score: score(payload, "home"),
         away_score: score(payload, "away"),
+        home_score_ht: score(payload, "home_score_ht"),
+        away_score_ht: score(payload, "away_score_ht"),
+        extra_time_score: json_payload(payload["extra_time_score"]),
+        penalty_shootout: json_payload(payload["penalty_shootout"]),
         current_minute: current_minute(payload),
         period: period(payload),
-        stage: payload["stage"] || payload["round"],
+        stage: stage(payload),
         group_name: payload["group"] || payload["group_name"],
+        round_name: value_from(payload["round_name"], payload["roundName"]),
+        round_number: value_from(payload["round_number"], payload["roundNumber"]),
+        is_neutral_ground: ActiveModel::Type::Boolean.new.cast(payload["is_neutral_ground"]) || false,
+        travel_distance_km: payload["travel_distance_km"],
+        weather: json_payload(payload["weather"]),
+        pitch_condition: payload["pitch_condition"],
+        attendance: payload["attendance"],
+        home_coach_id: payload["home_coach_id"],
+        away_coach_id: payload["away_coach_id"],
+        referee_id: payload["referee_id"],
         last_synced_at: Time.current
       )
 
@@ -124,7 +140,10 @@ module Football
     def find_or_create_team(payload)
       team = Team.find_by(code: payload.fetch(:code)) || Team.find_by(name: payload.fetch(:name))
       if team
-        team.update!(name: payload.fetch(:name)) if team.name != payload.fetch(:name)
+        changes = {}
+        changes[:name] = payload.fetch(:name) if team.name != payload.fetch(:name)
+        changes[:code] = payload.fetch(:code) if should_promote_team_code?(team, payload.fetch(:code))
+        team.update!(changes) if changes.any?
         team
       else
         Team.create!(code: payload.fetch(:code)) do |new_team|
@@ -137,7 +156,7 @@ module Football
       camel_side = "#{side}Team"
       team = payload["#{side}_team"] || payload[side] || payload[camel_side] || {}
       name = team["name"] || payload["#{side}_team"] || payload["#{side}_team_name"] || side.titleize
-      code = team["code"] || team["tla"] || team["short_name"] || external_team_code(payload, side) || name.parameterize.upcase.first(12)
+      code = external_team_code(payload, side) || team["code"] || team["tla"] || team["short_name"] || name.parameterize.upcase.first(12)
 
       { name: localized_team_name(name), code: code }
     end
@@ -151,8 +170,48 @@ module Football
       "BSD-#{external_id}" if external_id.present?
     end
 
+    def should_promote_team_code?(team, incoming_code)
+      incoming_code.to_s.start_with?("BSD-") && team.code != incoming_code
+    end
+
+    def venue_for(payload)
+      external_id = value_from(payload["venue_id"], payload_value(payload, "venue", "id"))
+      return if external_id.blank?
+
+      @venues_by_external_id[external_id.to_s] ||= find_or_sync_venue(external_id, payload["venue"])
+    end
+
+    def find_or_sync_venue(external_id, embedded_payload = nil)
+      payload = embedded_payload.presence || fetch_venue_payload(external_id) || {}
+      name = value_from(payload["name"], payload["stadium"], "Estadio #{external_id}")
+
+      Venue.find_or_initialize_by(external_id: external_id.to_s).tap do |venue|
+        venue.assign_attributes(
+          name: name,
+          city: payload["city"],
+          country: payload["country"],
+          capacity: payload["capacity"]
+        )
+        venue.save! if venue.changed?
+      end
+    end
+
+    def fetch_venue_payload(external_id)
+      return unless client.respond_to?(:venue)
+
+      client.venue(external_id)
+    rescue ApiClient::ApiError
+      nil
+    end
+
     def external_id(payload)
       (payload["id"] || payload["external_id"] || payload["match_id"] || fallback_external_id(payload)).to_s
+    end
+
+    def stage(payload)
+      return "Fase de grupos" if payload["group"].present? || payload["group_name"].present?
+
+      value_from(payload["stage"], payload["round"], payload["round_name"], payload["roundName"])
     end
 
     def kickoff_at(payload)
@@ -167,6 +226,7 @@ module Football
 
     def score(payload, side)
       value_from(
+        payload[side],
         payload_value(payload, "score", side),
         payload_value(payload, "score", side.camelize(:lower)),
         payload["#{side}_score"],
@@ -177,6 +237,13 @@ module Football
         payload_value(payload, "score", "full_time", side),
         payload_value(payload, "goals", side)
       )
+    end
+
+    def json_payload(value)
+      return "{}" if value.blank?
+      return value if value.is_a?(String)
+
+      JSON.generate(value)
     end
 
     def current_minute(payload)

@@ -12,12 +12,17 @@ class MatchesController < ApplicationController
   end
 
   def calendar
-    @matches_by_group = Match.ordered.to_a.group_by { |match| match.group_name.presence || "Mata-mata" }
+    @calendar_sections = Football::CalendarSections.new(Match.ordered.to_a).call
     @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
   end
 
   def groups
     @group_standings = Football::GroupStandings.new.call
+  end
+
+  def bracket
+    @bracket_rounds = Football::Bracket.new(Match.ordered.to_a).call
+    @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
   end
 
   def live_sync

@@ -4,6 +4,7 @@ class Match < ApplicationRecord
   belongs_to :home_team, class_name: "Team"
   belongs_to :away_team, class_name: "Team"
   belongs_to :underdog_team, class_name: "Team", optional: true
+  belongs_to :venue, optional: true
   has_many :predictions, dependent: :destroy
   has_many :activity_events, dependent: :destroy
   has_many :match_messages, dependent: :destroy
@@ -13,9 +14,10 @@ class Match < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validates :home_score, :away_score, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
-  scope :ordered, -> { includes(:home_team, :away_team).order(:kickoff_at) }
+  scope :ordered, -> { includes(:home_team, :away_team, :venue).order(:kickoff_at) }
 
   after_save :score_predictions, if: :score_relevant_change?
+  after_save :expire_group_standings_cache, if: :finished_score_relevant_change?
 
   def prediction_deadline
     kickoff_at - 10.minutes
@@ -43,6 +45,24 @@ class Match < ApplicationRecord
     []
   end
 
+  def weather_details
+    JSON.parse(weather.presence || "{}")
+  rescue JSON::ParserError
+    {}
+  end
+
+  def weather_label
+    details = weather_details
+    temperature = details["temperature_c"]
+    wind_speed = details["wind_speed"]
+    description = details["description"]
+    labels = []
+    labels << "#{temperature}°C" if temperature.present?
+    labels << "#{wind_speed} km/h vento" if wind_speed.present?
+    labels << description if description.present?
+    labels.join(" - ").presence
+  end
+
   def recent_match_messages(limit: 60)
     match_messages.includes(:user).latest_window(limit).to_a.reverse
   end
@@ -52,6 +72,7 @@ class Match < ApplicationRecord
   end
 
   def live_clock_label
+    return nil unless live?
     return nil if current_minute.blank? && period.blank?
 
     [ live_minute_label, localized_period.presence ].compact.join(" - ")
@@ -79,6 +100,7 @@ class Match < ApplicationRecord
   def status_label
     return "Ao vivo" if live?
     return "Aberto" if open_for_predictions?
+    return "Encerrado" if finished?
 
     status
   end
@@ -268,5 +290,13 @@ class Match < ApplicationRecord
 
   def score_relevant_change?
     saved_change_to_status? || saved_change_to_home_score? || saved_change_to_away_score?
+  end
+
+  def finished_score_relevant_change?
+    finished? && score_relevant_change?
+  end
+
+  def expire_group_standings_cache
+    Rails.cache.delete(Football::GroupStandings::CACHE_KEY)
   end
 end

@@ -1,0 +1,52 @@
+<div class="actions">
+  <div>
+    <p class="page-kicker">Mata-mata</p>
+    <h1 class="page-title">Chaveamento</h1>
+  </div>
+  <%= link_to "Ver calendario", calendar_matches_path, class: "button-secondary" %>
+</div>
+
+<% if @bracket_rounds.any? %>
+  <div class="bracket-board">
+    <% @bracket_rounds.each do |round| %>
+      <section class="bracket-round">
+        <div class="section-heading">
+          <div>
+            <p class="page-kicker">fase</p>
+            <h2><%= round.fetch(:label) %></h2>
+          </div>
+          <span class="count-pill"><%= round.fetch(:matches).size %></span>
+        </div>
+
+        <div class="bracket-match-list">
+          <% round.fetch(:matches).each do |match| %>
+            <% prediction = @predictions_by_match_id[match.id] %>
+            <%= link_to match_path(match), class: "bracket-match" do %>
+              <div class="activity-meta">
+                <span><%= l(match.kickoff_at, format: :short) %></span>
+                <% if match.venue.present? %>
+                  <span><%= [match.venue.name, match.venue.city].compact.join(" - ") %></span>
+                <% end %>
+              </div>
+              <div class="bracket-teams">
+                <span><%= match.home_team.name %></span>
+                <strong><%= match.score_label %></strong>
+                <span><%= match.away_team.name %></span>
+              </div>
+              <% if prediction.present? %>
+                <p class="muted">Seu palpite: <%= prediction.home_score %> x <%= prediction.away_score %></p>
+              <% elsif match.open_for_predictions? %>
+                <p class="muted">Aberto para palpite</p>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+<% else %>
+  <div class="panel-muted">
+    <p class="font-black text-slate-900">Chaveamento indisponivel.</p>
+    <p class="muted">Sincronize os jogos para carregar as fases de mata-mata.</p>
+  </div>
+<% end %>

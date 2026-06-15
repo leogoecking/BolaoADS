@@ -6,61 +6,81 @@
   <%= link_to "Voltar aos destaques", matches_path, class: "button-secondary" %>
 </div>
 
-<% if @matches_by_group.any? %>
-  <% @matches_by_group.each do |group_name, matches| %>
+<% if @calendar_sections.any? %>
+  <% @calendar_sections.each do |section| %>
     <section class="match-section">
       <div class="section-heading">
         <div>
-          <p class="page-kicker">Fase</p>
-          <h2><%= group_name %></h2>
+          <p class="page-kicker"><%= section.fetch(:kicker) %></p>
+          <h2><%= section.fetch(:title) %></h2>
         </div>
-        <span class="count-pill"><%= matches.size %></span>
+        <span class="count-pill"><%= section.fetch(:rounds).sum { |(_, matches)| matches.size } %></span>
       </div>
 
-      <div class="table-shell overflow-x-auto">
-        <table class="data-table compact-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Hora</th>
-              <th>Partida</th>
-              <th>Placar</th>
-              <th>Seu palpite</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% matches.each do |match| %>
-              <% prediction = @predictions_by_match_id[match.id] %>
-              <tr>
-                <td class="font-black text-slate-700"><%= l(match.kickoff_at.to_date, format: "%d/%m/%Y") %></td>
-                <td class="font-black text-slate-700"><%= l(match.kickoff_at, format: "%H:%M") %></td>
-                <td>
-                  <div class="versus-line">
-                    <span class="team-inline">
-                      <%= image_tag team_logo_url(match.home_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.home_team) %>
-                      <%= match.home_team.name %>
-                    </span>
-                    <span class="muted">x</span>
-                    <span class="team-inline">
-                      <%= image_tag team_logo_url(match.away_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.away_team) %>
-                      <%= match.away_team.name %>
-                    </span>
-                  </div>
-                </td>
-                <td>
-                  <span class="score-pill"><%= match.home_score.nil? ? "-" : "#{match.home_score} x #{match.away_score}" %></span>
-                  <% if match.live_clock_label.present? %>
-                    <div class="mt-1 text-xs font-black uppercase text-emerald-700"><%= match.live_clock_label %></div>
-                  <% end %>
-                </td>
-                <td class="font-bold text-slate-700"><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></td>
-                <td class="text-right"><%= link_to match.open_for_predictions? ? "Palpitar" : "Ver jogo", match_path(match), class: "button" %></td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
+      <% section.fetch(:rounds).each do |round_label, matches| %>
+        <div class="date-band">
+          <h3><%= round_label %></h3>
+          <div class="table-shell overflow-x-auto">
+            <table class="data-table compact-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Partida</th>
+                  <th>Local</th>
+                  <th>Clima</th>
+                  <th>Placar</th>
+                  <th>Seu palpite</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% matches.each do |match| %>
+                  <% prediction = @predictions_by_match_id[match.id] %>
+                  <tr>
+                    <td class="font-black text-slate-700">
+                      <%= l(match.kickoff_at.to_date, format: "%d/%m/%Y") %>
+                      <div class="mt-1 text-xs text-slate-500"><%= l(match.kickoff_at, format: "%H:%M") %></div>
+                    </td>
+                    <td>
+                      <div class="versus-line">
+                        <span class="team-inline">
+                          <%= image_tag team_logo_url(match.home_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.home_team) %>
+                          <%= match.home_team.name %>
+                        </span>
+                        <span class="muted">x</span>
+                        <span class="team-inline">
+                          <%= image_tag team_logo_url(match.away_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.away_team) %>
+                          <%= match.away_team.name %>
+                        </span>
+                      </div>
+                      <% if match.is_neutral_ground? %>
+                        <div class="mt-1 text-xs font-black uppercase text-amber-700">Campo neutro</div>
+                      <% end %>
+                    </td>
+                    <td class="font-bold text-slate-700">
+                      <% if match.venue.present? %>
+                        <%= match.venue.name %>
+                        <div class="mt-1 text-xs text-slate-500"><%= [match.venue.city, match.venue.country].compact.join(" - ") %></div>
+                      <% else %>
+                        <span class="muted">A definir</span>
+                      <% end %>
+                    </td>
+                    <td class="font-bold text-slate-700"><%= match.weather_label.presence || "-" %></td>
+                    <td>
+                      <span class="score-pill"><%= match.score_label %></span>
+                      <% if match.live_clock_label.present? %>
+                        <div class="mt-1 text-xs font-black uppercase text-emerald-700"><%= match.live_clock_label %></div>
+                      <% end %>
+                    </td>
+                    <td class="font-bold text-slate-700"><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></td>
+                    <td class="text-right"><%= link_to match.open_for_predictions? ? "Palpitar" : "Ver jogo", match_path(match), class: "button" %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% end %>
     </section>
   <% end %>
 <% else %>

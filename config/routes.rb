@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     collection do
       get :calendar
       get :groups
+      get :bracket
       post :live_sync
     end
 
