@@ -19,7 +19,10 @@ class PredictionSettlementService
   def settle_adcoins(points)
     payout = points.positive? ? prediction.adcoins_wager * 2 : 0
     delta = payout - prediction.adcoins_payout
-    prediction.user.increment!(:adcoins_balance, delta) unless delta.zero?
+    unless delta.zero?
+      prediction.user.increment!(:adcoins_balance, delta)
+      AchievementUnlocker.refresh_adcoins_achievements!
+    end
     prediction.update_columns(adcoins_payout: payout, adcoins_settled: true, updated_at: Time.current)
   end
 end

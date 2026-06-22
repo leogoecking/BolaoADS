@@ -25,9 +25,22 @@ class PredictionsController < ApplicationController
 
   def save_prediction
     if @prediction.save
-      redirect_to matches_path, notice: "Palpite salvo."
+      redirect_to prediction_return_path, notice: "Palpite salvo."
+    elsif params[:return_to].present?
+      redirect_to prediction_return_path, alert: @prediction.errors.full_messages.to_sentence
     else
+      prepare_match_show
       render "matches/show", status: :unprocessable_entity
     end
+  end
+
+  def prediction_return_path
+    url_from(params[:return_to]) || matches_path
+  end
+
+  def prepare_match_show
+    @live_stats = Football::LiveMatchStats.new(@match).call if @match.live? || @match.finished?
+    @match_messages = @match.recent_match_messages
+    @match_message = MatchMessage.new
   end
 end

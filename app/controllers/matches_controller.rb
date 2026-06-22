@@ -11,8 +11,11 @@ class MatchesController < ApplicationController
   end
 
   def calendar
-    @calendar_sections = Football::CalendarSections.new(Match.ordered.to_a).call
+    @calendar_period = params[:period].to_s
+    @calendar_period = "upcoming" unless Football::CalendarSections::PERIODS.include?(@calendar_period)
+    @calendar_sections = Football::CalendarSections.new(Match.ordered.to_a, period: @calendar_period).call
     @predictions_by_match_id = current_user.predictions.index_by(&:match_id)
+    @calendar_predictions_by_match_id = calendar_revealed_predictions_by_match_id
   end
 
   def groups
@@ -46,5 +49,25 @@ class MatchesController < ApplicationController
     @live_stats = Football::LiveMatchStats.new(@match).call if @match.live? || @match.finished?
     @match_messages = @match.recent_match_messages
     @match_message = MatchMessage.new
+  end
+
+  private
+
+  def calendar_revealed_predictions_by_match_id
+    return {} unless @calendar_period == "finished"
+
+    match_ids = @calendar_sections
+      .flat_map { |section| section.fetch(:matches) }
+      .select(&:predictions_revealed?)
+      .map(&:id)
+
+    return {} if match_ids.empty?
+
+    Prediction
+      .includes(:user)
+      .joins(:user)
+      .where(match_id: match_ids)
+      .order(Arel.sql("predictions.points DESC, users.name ASC"))
+      .group_by(&:match_id)
   end
 end

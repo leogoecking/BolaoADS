@@ -9,7 +9,7 @@
   </div>
 
   <div id="match-chat-messages" class="match-chat-body" data-chat-messages-url="<%= match_messages_path(match) %>">
-    <%= render "chat_messages", messages: messages %>
+    <%= render "matches/chat_messages", messages: messages %>
   </div>
 
   <%= form_with model: [match, message], url: match_messages_path(match), class: "match-chat-form", data: { chat_form: true } do |form| %>

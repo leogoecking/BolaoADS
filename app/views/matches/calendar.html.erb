@@ -1,92 +1,116 @@
 <div class="actions">
   <div>
-    <p class="page-kicker">Calendário</p>
-    <h1 class="page-title">Todos os jogos</h1>
+    <p class="page-kicker">Calendario</p>
+    <h1 class="page-title">Agenda de jogos</h1>
   </div>
   <%= link_to "Voltar aos destaques", matches_path, class: "button-secondary" %>
 </div>
 
-<% if @calendar_sections.any? %>
-  <% @calendar_sections.each do |section| %>
-    <section class="match-section">
-      <div class="section-heading">
-        <div>
-          <p class="page-kicker"><%= section.fetch(:kicker) %></p>
-          <h2><%= section.fetch(:title) %></h2>
-        </div>
-        <span class="count-pill"><%= section.fetch(:rounds).sum { |(_, matches)| matches.size } %></span>
-      </div>
-
-      <% section.fetch(:rounds).each do |round_label, matches| %>
-        <div class="date-band">
-          <h3><%= round_label %></h3>
-          <div class="table-shell overflow-x-auto">
-            <table class="data-table compact-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Partida</th>
-                  <th>Local</th>
-                  <th>Clima</th>
-                  <th>Placar</th>
-                  <th>Seu palpite</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <% matches.each do |match| %>
-                  <% prediction = @predictions_by_match_id[match.id] %>
-                  <tr>
-                    <td class="font-black text-slate-700">
-                      <%= l(match.kickoff_at.to_date, format: "%d/%m/%Y") %>
-                      <div class="mt-1 text-xs text-slate-500"><%= l(match.kickoff_at, format: "%H:%M") %></div>
-                    </td>
-                    <td>
-                      <div class="versus-line">
-                        <span class="team-inline">
-                          <%= image_tag team_logo_url(match.home_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.home_team) %>
-                          <%= match.home_team.name %>
-                        </span>
-                        <span class="muted">x</span>
-                        <span class="team-inline">
-                          <%= image_tag team_logo_url(match.away_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.away_team) %>
-                          <%= match.away_team.name %>
-                        </span>
-                      </div>
-                      <% if match.is_neutral_ground? %>
-                        <div class="mt-1 text-xs font-black uppercase text-amber-700">Campo neutro</div>
-                      <% end %>
-                    </td>
-                    <td class="font-bold text-slate-700">
-                      <% if match.venue.present? %>
-                        <%= match.venue.name %>
-                        <div class="mt-1 text-xs text-slate-500"><%= [match.venue.city, match.venue.country].compact.join(" - ") %></div>
-                      <% else %>
-                        <span class="muted">A definir</span>
-                      <% end %>
-                    </td>
-                    <td class="font-bold text-slate-700"><%= match.weather_label.presence || "-" %></td>
-                    <td>
-                      <span class="score-pill"><%= match.score_label %></span>
-                      <% if match.live_clock_label.present? %>
-                        <div class="mt-1 text-xs font-black uppercase text-emerald-700"><%= match.live_clock_label %></div>
-                      <% end %>
-                    </td>
-                    <td class="font-bold text-slate-700"><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></td>
-                    <td class="text-right"><%= link_to match.open_for_predictions? ? "Palpitar" : "Ver jogo", match_path(match), class: "button" %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      <% end %>
-    </section>
+<nav class="calendar-filters" aria-label="Filtros do calendario">
+  <% [
+    [ "upcoming", "Proximos" ],
+    [ "today", "Hoje" ],
+    [ "finished", "Encerrados" ]
+  ].each do |period, label| %>
+    <%= link_to label,
+      calendar_matches_path(period: period),
+      class: [ "calendar-filter", ("calendar-filter-active" if @calendar_period == period) ].compact.join(" "),
+      aria: { current: (@calendar_period == period ? "page" : nil) } %>
   <% end %>
+</nav>
+
+<% if @calendar_sections.any? %>
+  <div class="calendar-agenda">
+    <% @calendar_sections.each do |section| %>
+      <section class="match-section calendar-day">
+        <div class="section-heading">
+          <div>
+            <p class="page-kicker"><%= section.fetch(:kicker) %></p>
+            <h2><%= section.fetch(:title) %></h2>
+          </div>
+          <span class="count-pill"><%= section.fetch(:matches).size %></span>
+        </div>
+
+        <div class="calendar-match-list">
+          <% section.fetch(:matches).each do |match| %>
+            <% prediction = @predictions_by_match_id[match.id] %>
+            <% revealed_predictions = @calendar_predictions_by_match_id.fetch(match.id, []) %>
+            <article class="calendar-match-card <%= "calendar-match-finished" if match.finished? %>" <%= %(data-modal-open="quick-prediction-modal-#{match.id}" role="button" tabindex="0").html_safe if match.open_for_predictions? %>>
+              <div class="calendar-match-time">
+                <strong><%= l(match.kickoff_at, format: "%H:%M") %></strong>
+                <span class="status-pill <%= "status-open" if match.open_for_predictions? %> <%= "status-closed" if match.finished? %>">
+                  <%= match.status_label %>
+                </span>
+              </div>
+
+              <div class="calendar-match-main">
+                <div class="versus-line calendar-versus">
+                  <span class="team-inline">
+                    <%= image_tag team_logo_url(match.home_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.home_team) %>
+                    <%= match.home_team.name %>
+                  </span>
+                  <span class="score-pill"><%= match.score_label %></span>
+                  <span class="team-inline">
+                    <%= image_tag team_logo_url(match.away_team), class: "team-logo small", alt: "", onerror: "this.style.display='none'" if team_logo_url(match.away_team) %>
+                    <%= match.away_team.name %>
+                  </span>
+                </div>
+
+                <div class="calendar-match-meta">
+                  <span><%= [match.group_name.presence || match.stage.presence, ("Rodada #{match.round_number}" if match.round_number.present?)].compact.join(" - ").presence || "Jogo da Copa" %></span>
+                  <% if match.live_clock_label.present? %>
+                    <span><%= match.live_clock_label %></span>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="calendar-match-side">
+                <p class="calendar-prediction">
+                  <span>Seu palpite</span>
+                  <strong><%= prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite" %></strong>
+                </p>
+                <% unless match.open_for_predictions? %>
+                  <%= link_to "Ver jogo", match_path(match), class: "button" %>
+                <% end %>
+              </div>
+
+              <% if match.open_for_predictions? %>
+                <%= render "quick_prediction_modal", match: match, prediction: prediction, return_to: request.fullpath %>
+              <% end %>
+
+              <% if @calendar_period == "finished" && match.finished? %>
+                <details class="calendar-predictions-panel">
+                  <summary>
+                    <span>Ver palpites</span>
+                    <strong><%= revealed_predictions.size %></strong>
+                  </summary>
+
+                  <% if revealed_predictions.any? %>
+                    <div class="calendar-predictions-list">
+                      <% revealed_predictions.each do |revealed_prediction| %>
+                        <div class="calendar-prediction-row">
+                          <strong><%= revealed_prediction.user.name %></strong>
+                          <span class="score-pill"><%= revealed_prediction.home_score %> x <%= revealed_prediction.away_score %></span>
+                          <span><%= revealed_prediction.adcoins_wager %> ADcoins</span>
+                          <span><%= revealed_prediction.points %> pts</span>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <p class="muted mt-2">Nenhum palpite registrado.</p>
+                  <% end %>
+                </details>
+              <% end %>
+            </article>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
 <% else %>
   <div class="panel-muted">
-    <p class="font-black text-slate-900">Nenhum jogo cadastrado ainda.</p>
-    <p class="muted">Use a sincronização para importar a Copa do Mundo.</p>
+    <p class="font-black text-slate-900">Nenhum jogo para este filtro.</p>
+    <p class="muted">Use outro filtro da agenda ou sincronize os jogos da Copa.</p>
   </div>
 <% end %>
 

@@ -114,6 +114,7 @@ class ActivityEventGenerator
 
     user_id, positions_gained, previous_position, current_position = climb
     user = User.find(user_id)
+    AchievementUnlocker.new(user).unlock_big_climb!(positions_gained)
     create_event(
       event_type: "big_climb",
       user: user,

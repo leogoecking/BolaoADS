@@ -100,7 +100,7 @@
       <button type="button" class="match-modal-close" data-modal-close aria-label="Fechar">x</button>
     </div>
     <div class="match-modal-body">
-      <%= render "live_match_stats", match: @match, live_stats: @live_stats %>
+      <%= render "matches/live_match_stats", match: @match, live_stats: @live_stats %>
     </div>
   </div>
 </dialog>
@@ -115,7 +115,7 @@
       <button type="button" class="match-modal-close" data-modal-close aria-label="Fechar">x</button>
     </div>
     <div class="match-modal-body">
-      <%= render "predictions_modal_content", match: @match, revealed_predictions: Array(@revealed_predictions) %>
+      <%= render "matches/predictions_modal_content", match: @match, revealed_predictions: Array(@revealed_predictions) %>
     </div>
   </div>
 </dialog>
@@ -151,29 +151,12 @@
   <% end %>
 </div>
 
-<%= render "live_score_polling" %>
-<%= render "chat_drawer", match: @match, messages: @match_messages, message: @match_message %>
+<%= render "matches/live_score_polling" %>
+<%= render "matches/chat_drawer", match: @match, messages: @match_messages, message: @match_message %>
 
 <% content_for :body_scripts do %>
   <script>
     (() => {
-      document.querySelectorAll("[data-modal-open]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const dialog = document.getElementById(button.dataset.modalOpen);
-          if (dialog && !dialog.open) dialog.showModal();
-        });
-      });
-
-      document.querySelectorAll(".match-modal").forEach((dialog) => {
-        dialog.querySelectorAll("[data-modal-close]").forEach((button) => {
-          button.addEventListener("click", () => dialog.close());
-        });
-
-        dialog.addEventListener("click", (event) => {
-          if (event.target === dialog) dialog.close();
-        });
-      });
-
       const chatDrawer = document.getElementById("match-chat-drawer");
       const chatOpen = document.querySelector("[data-chat-open]");
       const chatClose = chatDrawer?.querySelector("[data-chat-close]");

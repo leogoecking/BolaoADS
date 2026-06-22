@@ -79,11 +79,15 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
       assert_includes response.body, "Jogos do dia"
       assert_includes response.body, "Próximos jogos"
       assert_includes response.body, "Calend"
+      assert_includes response.body, "quick-prediction-modal"
+      assert_includes response.body, "data-modal-open"
+      assert_includes response.body, "palpite rapido"
+      assert_not_includes response.body, ">Palpitar<"
       assert_not_includes response.body, "Tabela de grupos"
     end
   end
 
-  test "shows full calendar grouped by stage" do
+  test "shows calendar as agenda cards" do
     player = user
     game = match_record(kickoff_at: 1.day.from_now)
     venue = Venue.create!(external_id: "1182", name: "MetLife Stadium", city: "East Rutherford", country: "USA")
@@ -93,10 +97,101 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     get calendar_matches_path
 
     assert_response :success
-    assert_includes response.body, "Todos os jogos"
+    assert_includes response.body, "Agenda de jogos"
+    assert_includes response.body, "Proximos"
     assert_includes response.body, "Group A"
     assert_includes response.body, "Rodada 1"
-    assert_includes response.body, "MetLife Stadium"
+    assert_includes response.body, "quick-prediction-modal"
+    assert_includes response.body, "data-modal-open"
+    assert_includes response.body, "palpite rapido"
+    assert_not_includes response.body, ">Palpitar<"
+    assert_not_includes response.body, "MetLife Stadium"
+  end
+
+  test "calendar today filter shows only today matches" do
+    player = user
+
+    travel_to Time.zone.local(2026, 6, 20, 10, 0, 0) do
+      today_game = match_record(kickoff_at: Time.zone.local(2026, 6, 20, 16, 0, 0))
+      tomorrow_game = match_record(kickoff_at: Time.zone.local(2026, 6, 21, 16, 0, 0))
+
+      post session_path, params: { email: player.email, password: "secret123" }
+      get calendar_matches_path(period: "today")
+
+      assert_response :success
+      assert_includes response.body, "Hoje"
+      assert_not_includes response.body, "Translation missing"
+      assert_includes response.body, today_game.home_team.name
+      assert_not_includes response.body, tomorrow_game.home_team.name
+    end
+  end
+
+  test "calendar upcoming filter excludes finished matches" do
+    player = user
+
+    travel_to Time.zone.local(2026, 6, 20, 10, 0, 0) do
+      upcoming_game = match_record(kickoff_at: 1.day.from_now)
+      finished_game = match_record(kickoff_at: 1.day.ago, status: "finished", home_score: 1, away_score: 0)
+
+      post session_path, params: { email: player.email, password: "secret123" }
+      get calendar_matches_path(period: "upcoming")
+
+      assert_response :success
+      assert_includes response.body, upcoming_game.home_team.name
+      assert_not_includes response.body, finished_game.home_team.name
+      assert_includes response.body, "quick-prediction-modal"
+    end
+  end
+
+  test "calendar invalid filter falls back to upcoming" do
+    player = user
+
+    travel_to Time.zone.local(2026, 6, 20, 10, 0, 0) do
+      upcoming_game = match_record(kickoff_at: 1.day.from_now)
+      finished_game = match_record(kickoff_at: 1.day.ago, status: "finished", home_score: 1, away_score: 0)
+
+      post session_path, params: { email: player.email, password: "secret123" }
+      get calendar_matches_path(period: "all")
+
+      assert_response :success
+      assert_includes response.body, "Proximos"
+      assert_not_includes response.body, "Todos"
+      assert_includes response.body, upcoming_game.home_team.name
+      assert_not_includes response.body, finished_game.home_team.name
+    end
+  end
+
+  test "calendar finished filter shows compact revealed predictions" do
+    player = user
+    bia = user(name: "Bia", email: "bia@example.com")
+    carlos = user(name: "Carlos", email: "carlos@example.com")
+
+    travel_to Time.zone.local(2026, 6, 20, 10, 0, 0) do
+      game = match_record(kickoff_at: 1.day.from_now)
+      older_game = match_record(kickoff_at: 2.days.from_now)
+      Prediction.create!(user: carlos, match: game, home_score: 3, away_score: 1, adcoins_wager: 5)
+      Prediction.create!(user: bia, match: game, home_score: 2, away_score: 1, adcoins_wager: 15)
+      game.update!(kickoff_at: 1.day.ago, status: "finished", home_score: 2, away_score: 1)
+      older_game.update!(kickoff_at: 3.days.ago, status: "finished", home_score: 0, away_score: 0)
+
+      post session_path, params: { email: player.email, password: "secret123" }
+      get calendar_matches_path(period: "finished")
+
+      assert_response :success
+      assert_includes response.body, "Encerrados"
+      assert_includes response.body, "Ver palpites"
+      assert_not_includes response.body, "quick-prediction-modal"
+      assert_includes response.body, ">2</strong>"
+      assert_includes response.body, "Bia"
+      assert_includes response.body, "2 x 1"
+      assert_includes response.body, "15 ADcoins"
+      assert_includes response.body, "3 pts"
+      assert_includes response.body, "Carlos"
+      assert_includes response.body, "5 ADcoins"
+      assert_includes response.body, "1 pts"
+      assert_operator response.body.index("Bia"), :<, response.body.index("Carlos")
+      assert_operator response.body.index(game.home_team.name), :<, response.body.index(older_game.home_team.name)
+    end
   end
 
   test "shows knockout bracket page" do

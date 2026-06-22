@@ -1,0 +1,18 @@
+<div class="match-meta">
+  <span><%= l(match.kickoff_at, format: :short) %></span>
+  <span class="status-pill <%= match.open_for_predictions? || match.live? ? "status-open" : "status-closed" %>"><%= match.status_label %></span>
+</div>
+<div class="team-row">
+  <%= image_tag team_logo_url(match.home_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.home_team) %>
+  <span class="team-fallback"><%= team_initials(match.home_team) %></span>
+  <strong><%= match.home_team.name %></strong>
+</div>
+<div class="team-row">
+  <%= image_tag team_logo_url(match.away_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.away_team) %>
+  <span class="team-fallback"><%= team_initials(match.away_team) %></span>
+  <strong><%= match.away_team.name %></strong>
+</div>
+<div class="match-footer">
+  <span class="score-pill"><%= match.score_label %></span>
+  <span><%= match.live_clock_label.presence || (prediction ? "#{prediction.home_score} x #{prediction.away_score}" : "Sem palpite") %></span>
+</div>

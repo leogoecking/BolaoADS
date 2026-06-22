@@ -50,6 +50,40 @@
       <% if alert.present? %><div class="flash alert"><%= alert %></div><% end %>
       <%= yield %>
     </main>
+    <script>
+      (() => {
+        document.querySelectorAll("[data-modal-open]").forEach((button) => {
+          const openModal = () => {
+            const dialog = document.getElementById(button.dataset.modalOpen);
+            if (dialog && !dialog.open) dialog.showModal();
+          };
+
+          button.addEventListener("click", (event) => {
+            const interactiveTarget = event.target.closest("a, button, input, select, textarea, summary");
+            if (interactiveTarget && interactiveTarget !== button) return;
+
+            openModal();
+          });
+
+          button.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+
+            event.preventDefault();
+            openModal();
+          });
+        });
+
+        document.querySelectorAll(".match-modal").forEach((dialog) => {
+          dialog.querySelectorAll("[data-modal-close]").forEach((button) => {
+            button.addEventListener("click", () => dialog.close());
+          });
+
+          dialog.addEventListener("click", (event) => {
+            if (event.target === dialog) dialog.close();
+          });
+        });
+      })();
+    </script>
     <%= yield :body_scripts %>
   </body>
 </html>

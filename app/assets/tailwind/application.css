@@ -114,6 +114,18 @@
     @apply mb-5 flex flex-wrap items-center gap-2;
   }
 
+  .calendar-filters {
+    @apply mb-5 flex flex-wrap items-center gap-2;
+  }
+
+  .calendar-filter {
+    @apply inline-flex min-h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-950;
+  }
+
+  .calendar-filter-active {
+    @apply border-emerald-700 bg-emerald-700 text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-800 hover:text-white;
+  }
+
   .section-actions {
     @apply mt-4 justify-end;
   }
@@ -277,6 +289,10 @@
     @apply block rounded-lg border border-white/80 bg-white/95 p-4 text-slate-900 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:text-slate-950 hover:shadow-xl;
   }
 
+  .match-card-button {
+    @apply block w-full rounded-none border-0 bg-transparent p-0 text-left text-slate-900 shadow-none hover:scale-100 hover:border-transparent hover:bg-transparent hover:text-slate-950 hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400;
+  }
+
   .muted-card {
     @apply bg-slate-50/90;
   }
@@ -288,6 +304,10 @@
 
   .match-footer {
     @apply mb-0 mt-4 text-slate-700;
+  }
+
+  .match-card-actions {
+    @apply mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4;
   }
 
   .team-row {
@@ -316,6 +336,94 @@
 
   .date-band h3 {
     @apply mb-2 text-lg font-black text-slate-800;
+  }
+
+  .calendar-agenda {
+    @apply grid gap-6;
+  }
+
+  .calendar-day {
+    @apply mb-0;
+  }
+
+  .calendar-match-list {
+    @apply grid gap-3;
+  }
+
+  .calendar-match-card {
+    @apply grid gap-4 rounded-lg border border-white/80 bg-white/95 p-4 text-slate-950 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-xl lg:grid-cols-[7rem_1fr_12rem] lg:items-center;
+  }
+
+  .calendar-match-card[role="button"] {
+    @apply cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400;
+  }
+
+  .calendar-match-finished {
+    @apply bg-slate-50/90;
+  }
+
+  .calendar-match-time {
+    @apply flex items-center justify-between gap-3 lg:grid lg:justify-items-start;
+  }
+
+  .calendar-match-time strong {
+    @apply text-xl font-black text-slate-950;
+  }
+
+  .calendar-match-main {
+    @apply min-w-0;
+  }
+
+  .calendar-versus {
+    @apply gap-3;
+  }
+
+  .calendar-match-meta {
+    @apply mt-2 flex flex-wrap items-center gap-2 text-xs font-black uppercase text-slate-500;
+  }
+
+  .calendar-match-side {
+    @apply grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center lg:grid-cols-1 lg:justify-items-end;
+  }
+
+  .calendar-prediction {
+    @apply grid gap-1 text-sm text-slate-500 lg:text-right;
+  }
+
+  .calendar-prediction span {
+    @apply text-xs font-black uppercase;
+  }
+
+  .calendar-prediction strong {
+    @apply text-base font-black text-slate-900;
+  }
+
+  .calendar-predictions-panel {
+    @apply rounded-lg border border-slate-200 bg-slate-50 p-3 lg:col-span-3;
+  }
+
+  .calendar-predictions-panel summary {
+    @apply flex cursor-pointer items-center justify-between gap-3 text-sm font-black text-slate-800;
+  }
+
+  .calendar-predictions-panel summary strong {
+    @apply inline-flex min-w-8 items-center justify-center rounded-md bg-emerald-950 px-2 py-1 text-xs text-amber-300;
+  }
+
+  .calendar-predictions-list {
+    @apply mt-3 grid gap-2;
+  }
+
+  .calendar-prediction-row {
+    @apply grid gap-2 rounded-md border border-white bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm sm:grid-cols-[1fr_auto_auto_auto] sm:items-center;
+  }
+
+  .calendar-prediction-row > strong {
+    @apply min-w-0 text-slate-950;
+  }
+
+  .calendar-prediction-row > span:last-child {
+    @apply font-black text-emerald-800;
   }
 
   .compact-table {
@@ -426,6 +534,59 @@
     @apply inline-flex min-w-12 items-center justify-center rounded-md bg-amber-300 px-3 py-1.5 text-sm font-black text-emerald-950 shadow-lg shadow-amber-300/30;
   }
 
+  .achievement-grid {
+    @apply grid gap-3 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .achievement-card {
+    @apply flex gap-3 rounded-lg border border-white/80 bg-white/90 p-4 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-xl;
+  }
+
+  .achievement-card-unlocked {
+    @apply border-emerald-200 bg-emerald-50/90;
+  }
+
+  .achievement-icon {
+    @apply grid h-12 w-12 shrink-0 place-items-center rounded-md bg-slate-950 text-2xl shadow-lg shadow-slate-950/20 ring-2 ring-amber-300/70;
+  }
+
+  .achievement-card-unlocked .achievement-icon {
+    @apply bg-emerald-950;
+  }
+
+  .achievement-content {
+    @apply min-w-0 flex-1;
+  }
+
+  .achievement-heading {
+    @apply mb-2 flex flex-wrap items-start justify-between gap-2;
+  }
+
+  .achievement-heading h2 {
+    @apply text-base font-black text-slate-950;
+  }
+
+  .achievement-meta {
+    @apply mt-3 text-xs font-black uppercase text-slate-500;
+  }
+
+  .ranking-achievements {
+    @apply flex min-w-28 flex-wrap items-center gap-1.5;
+  }
+
+  .ranking-achievement-icon,
+  .ranking-achievement-more {
+    @apply inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-amber-200 bg-amber-50 px-2 text-sm font-black text-slate-950 shadow-sm;
+  }
+
+  .ranking-achievement-more {
+    @apply bg-emerald-950 text-amber-300;
+  }
+
+  .adcoins-leader-pill {
+    @apply inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-sm font-black text-amber-800 shadow-sm;
+  }
+
   .match-modal {
     @apply m-auto w-[min(92vw,64rem)] max-h-[86vh] rounded-lg border border-white/80 bg-transparent p-0 text-slate-950 shadow-2xl outline-none;
   }
@@ -448,6 +609,74 @@
 
   .match-modal-close {
     @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white p-0 text-lg font-black leading-none text-slate-700 shadow-sm transition hover:bg-amber-50 hover:text-slate-950;
+  }
+
+  .quick-prediction-card {
+    @apply bg-gradient-to-br from-white via-slate-50 to-emerald-50;
+  }
+
+  .quick-prediction-header {
+    @apply border-emerald-100 bg-white/90;
+  }
+
+  .quick-prediction-summary {
+    @apply grid gap-3 rounded-lg border border-emerald-100 bg-white/90 p-4 shadow-sm sm:grid-cols-[1fr_auto_1fr] sm:items-center lg:grid-cols-[1fr_auto_1fr_14rem];
+  }
+
+  .quick-prediction-team {
+    @apply flex min-w-0 items-center gap-3;
+  }
+
+  .quick-prediction-team strong {
+    @apply min-w-0 text-base font-black text-slate-950;
+  }
+
+  .quick-prediction-team-away {
+    @apply sm:flex-row-reverse sm:text-right;
+  }
+
+  .quick-prediction-versus {
+    @apply hidden rounded-md bg-slate-950 px-3 py-1.5 text-sm font-black text-white shadow-lg shadow-slate-950/20 ring-2 ring-amber-300/70 sm:inline-flex;
+  }
+
+  .quick-balance-panel {
+    @apply grid gap-0.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm shadow-sm sm:col-span-3 lg:col-span-1;
+  }
+
+  .quick-balance-panel span {
+    @apply text-xs font-black uppercase text-amber-800;
+  }
+
+  .quick-balance-panel strong {
+    @apply text-lg font-black text-slate-950;
+  }
+
+  .quick-balance-panel small {
+    @apply text-xs font-bold text-slate-500;
+  }
+
+  .quick-score-grid {
+    @apply mt-4 grid gap-3 sm:grid-cols-2;
+  }
+
+  .quick-score-field {
+    @apply rounded-lg border border-slate-200 bg-white p-4 shadow-sm;
+  }
+
+  .quick-score-field label {
+    @apply mt-0;
+  }
+
+  .quick-score-field input {
+    @apply h-14 text-center text-2xl font-black;
+  }
+
+  .quick-wager-row {
+    @apply mt-4 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[1fr_auto] sm:items-end;
+  }
+
+  .quick-wager-row label {
+    @apply mt-0;
   }
 
   .match-chat-drawer {

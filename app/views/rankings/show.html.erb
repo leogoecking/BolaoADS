@@ -19,6 +19,7 @@
         <th>Participante</th>
         <th>Pontos</th>
         <th>ADcoins</th>
+        <th>Conquistas</th>
         <th>Na gaveta</th>
         <th>Acertou o rumo</th>
       </tr>
@@ -33,7 +34,34 @@
           </td>
           <td class="font-black text-slate-950"><%= user.name %> <%= index.zero? ? "👑" : "" %></td>
           <td class="font-black text-emerald-800"><%= user.total_points %> pts</td>
-          <td class="font-bold text-amber-700"><%= user.adcoins_balance %> 🪙</td>
+          <td>
+            <% adcoins_leader = @top_adcoins_balance.positive? && user.adcoins_balance.to_i == @top_adcoins_balance %>
+            <% if adcoins_leader %>
+              <span class="adcoins-leader-pill" title="Maior saldo de ADcoins"><%= user.adcoins_balance %> 🪙</span>
+            <% else %>
+              <span class="font-bold text-amber-700"><%= user.adcoins_balance %> 🪙</span>
+            <% end %>
+          </td>
+          <td>
+            <% unlocked_achievements = user.user_achievements.sort_by(&:unlocked_at).reverse %>
+            <% visible_achievements = unlocked_achievements.first(3) %>
+            <% hidden_count = unlocked_achievements.size - visible_achievements.size %>
+
+            <% if visible_achievements.any? %>
+              <div class="ranking-achievements" aria-label="<%= unlocked_achievements.size %> conquistas liberadas">
+                <% visible_achievements.each do |user_achievement| %>
+                  <span class="ranking-achievement-icon" title="<%= user_achievement.achievement.name %>">
+                    <%= achievement_icon(user_achievement.achievement) %>
+                  </span>
+                <% end %>
+                <% if hidden_count.positive? %>
+                  <span class="ranking-achievement-more">+<%= hidden_count %></span>
+                <% end %>
+              </div>
+            <% else %>
+              <span class="muted">Nenhuma</span>
+            <% end %>
+          </td>
           <td><%= user.exact_hits %> 🎯</td>
           <td><%= user.result_hits %> ✅</td>
         </tr>

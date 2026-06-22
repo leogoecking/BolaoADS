@@ -6,7 +6,15 @@ class Achievement < ApplicationRecord
     "pe_quente" => ["Pe Quente", "Acertar 5 vencedores seguidos."],
     "geladeira" => ["Geladeira", "Ficar 3 rodadas seguidas sem pontuar."],
     "sniper" => ["Sniper", "Acertar placar exato em mata-mata."],
-    "ultima_hora" => ["Ultima Hora", "Palpitar entre 20 e 10 minutos antes do jogo."]
+    "ultima_hora" => ["Ultima Hora", "Palpitar entre 20 e 10 minutos antes do jogo."],
+    "maratonista_grupos" => ["Maratonista da Fase de Grupos", "Fazer palpites em 30 jogos da fase de grupos."],
+    "nao_dormiu_no_ponto" => ["Nao Dormiu no Ponto", "Palpitar em todos os jogos de um mesmo dia."],
+    "cheirinho_lideranca" => ["Cheirinho de Lideranca", "Subir 3 ou mais posicoes no ranking apos um jogo encerrado."],
+    "all_in_consciente" => ["All-in Consciente", "Apostar 100+ ADcoins em um palpite e pontuar."],
+    "so_passou_raiva" => ["So Passou Raiva", "Errar 10 palpites finalizados no total."],
+    "sobreviveu_mata_mata" => ["Sobreviveu ao Mata-Mata", "Acertar qualquer resultado em jogo eliminatorio."],
+    "magnata_do_palpite" => ["Magnata do Palpite", "Ser o usuario com mais ADcoins."],
+    "milionario_de_mentira" => ["Milionario de Mentira", "Acumular 1.000 ADcoins."]
   }.freeze
 
   has_many :user_achievements, dependent: :destroy

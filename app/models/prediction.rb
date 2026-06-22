@@ -11,7 +11,7 @@ class Prediction < ApplicationRecord
   validate :match_accepts_predictions, on: %i[create update]
 
   after_save :reserve_adcoins, if: :saved_change_to_adcoins_wager?
-  after_save :unlock_last_minute
+  after_save :unlock_achievements
 
   def calculate_points!
     PredictionSettlementService.new(self).call
@@ -53,9 +53,12 @@ class Prediction < ApplicationRecord
     return if delta.zero?
 
     user.increment!(:adcoins_balance, -delta)
+    AchievementUnlocker.refresh_adcoins_achievements!
   end
 
-  def unlock_last_minute
-    AchievementUnlocker.new(user).unlock_last_minute!(self)
+  def unlock_achievements
+    unlocker = AchievementUnlocker.new(user)
+    unlocker.call
+    unlocker.unlock_last_minute!(self)
   end
 end

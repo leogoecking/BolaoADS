@@ -1,5 +1,14 @@
 pt-BR:
   hello: "Ola"
+  date:
+    day_names:
+      - Domingo
+      - Segunda-feira
+      - Terca-feira
+      - Quarta-feira
+      - Quinta-feira
+      - Sexta-feira
+      - Sabado
   time:
     formats:
       short: "%d/%m/%Y %H:%M"

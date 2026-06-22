@@ -1,0 +1,65 @@
+<% prediction = local_assigns.fetch(:prediction) || current_user.predictions.find_or_initialize_by(match: match) %>
+<% return_to = local_assigns.fetch(:return_to, request.fullpath) %>
+<% wager_limit = current_user.adcoins_balance + prediction.adcoins_wager.to_i %>
+
+<dialog id="quick-prediction-modal-<%= match.id %>" class="match-modal">
+  <div class="match-modal-card quick-prediction-card">
+    <div class="match-modal-header quick-prediction-header">
+      <div>
+        <p class="page-kicker">palpite rapido</p>
+        <h2 class="text-xl font-black text-slate-950"><%= match.home_team.name %> x <%= match.away_team.name %></h2>
+        <p class="muted"><%= l(match.kickoff_at, format: :short) %></p>
+      </div>
+      <button type="button" class="match-modal-close" data-modal-close aria-label="Fechar">x</button>
+    </div>
+
+    <div class="match-modal-body">
+      <%= form_with model: [match, prediction], url: match_prediction_path(match), method: (prediction.persisted? ? :patch : :post) do |form| %>
+        <%= hidden_field_tag :return_to, return_to %>
+
+        <div class="quick-prediction-summary">
+          <div class="quick-prediction-team">
+            <%= image_tag team_logo_url(match.home_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.home_team) %>
+            <span class="team-fallback"><%= team_initials(match.home_team) %></span>
+            <strong><%= match.home_team.name %></strong>
+          </div>
+
+          <span class="quick-prediction-versus">x</span>
+
+          <div class="quick-prediction-team quick-prediction-team-away">
+            <%= image_tag team_logo_url(match.away_team), class: "team-logo", alt: "", onerror: "this.style.display='none';this.nextElementSibling.style.display='grid'" if team_logo_url(match.away_team) %>
+            <span class="team-fallback"><%= team_initials(match.away_team) %></span>
+            <strong><%= match.away_team.name %></strong>
+          </div>
+
+          <div class="quick-balance-panel">
+            <span>Saldo atual</span>
+            <strong><%= current_user.adcoins_balance %> ADcoins</strong>
+            <% if prediction.persisted? %>
+              <small>Limite neste palpite: <%= wager_limit %></small>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="quick-score-grid">
+          <div class="quick-score-field">
+            <%= form.label :home_score, match.home_team.name %>
+            <%= form.number_field :home_score, min: 0, required: true, inputmode: "numeric" %>
+          </div>
+          <div class="quick-score-field">
+            <%= form.label :away_score, match.away_team.name %>
+            <%= form.number_field :away_score, min: 0, required: true, inputmode: "numeric" %>
+          </div>
+        </div>
+
+        <div class="quick-wager-row">
+          <div>
+            <%= form.label :adcoins_wager, "ADcoins apostados" %>
+            <%= form.number_field :adcoins_wager, min: 0, max: wager_limit, required: true, inputmode: "numeric" %>
+          </div>
+          <%= form.submit prediction.persisted? ? "Atualizar palpite" : "Salvar palpite" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</dialog>

@@ -10,30 +10,27 @@
   <p class="muted">Conquistas sao decorativas e nao alteram a pontuacao do ranking.</p>
 </div>
 
-<div class="table-shell mt-4 overflow-x-auto">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Badge</th>
-        <th>Como ganha moral</th>
-        <th>Status da ostentacao</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @achievements.each do |achievement| %>
-        <% unlocked = @unlocked_by_key[achievement.key] %>
-        <tr>
-          <td class="font-black text-slate-950">🔥 <%= achievement.name %></td>
-          <td class="text-slate-700"><%= achievement.description %></td>
-          <td>
-            <% if unlocked %>
-              <span class="status-pill status-open">Liberada em <%= l(unlocked.unlocked_at, format: :short) %> 🏅</span>
-            <% else %>
-              <span class="status-pill status-closed">Bloqueada 👀</span>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+<div class="achievement-grid mt-4">
+  <% @achievements.each do |achievement| %>
+    <% unlocked = @unlocked_by_key[achievement.key] %>
+    <article class="achievement-card <%= "achievement-card-unlocked" if unlocked %>">
+      <div class="achievement-icon" aria-hidden="true"><%= achievement_icon(achievement) %></div>
+      <div class="achievement-content">
+        <div class="achievement-heading">
+          <h2><%= achievement.name %></h2>
+          <% if unlocked %>
+            <span class="status-pill status-open">Liberada</span>
+          <% else %>
+            <span class="status-pill status-closed">Bloqueada</span>
+          <% end %>
+        </div>
+        <p class="text-slate-700"><%= achievement.description %></p>
+        <% if unlocked %>
+          <p class="achievement-meta">Liberada em <%= l(unlocked.unlocked_at, format: :short) %></p>
+        <% else %>
+          <p class="achievement-meta">Continue palpitando para destravar.</p>
+        <% end %>
+      </div>
+    </article>
+  <% end %>
 </div>

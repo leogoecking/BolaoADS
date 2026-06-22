@@ -54,6 +54,24 @@ class ActivityEventGeneratorTest < ActiveSupport::TestCase
     assert_includes event.message, "perdeu 3 posicoes"
   end
 
+  test "unlocks leadership smell achievement after big ranking climb" do
+    ana = user(name: "Ana", email: "ana@example.com")
+    bia = user(name: "Bia", email: "bia@example.com")
+    carla = user(name: "Carla", email: "carla@example.com")
+    dani = user(name: "Dani", email: "dani@example.com")
+    previous_ranking = [ana, bia, carla, dani]
+
+    game = match_record(kickoff_at: 1.day.from_now)
+    Prediction.create!(user: dani, match: game, home_score: 2, away_score: 1)
+    game.update_columns(kickoff_at: 1.day.ago, status: "finished", home_score: 2, away_score: 1)
+    dani.predictions.find_by!(match: game).update_columns(points: 3)
+
+    ActivityEventGenerator.new(game, previous_ranking: previous_ranking).call
+
+    assert ActivityEvent.exists?(event_type: "big_climb", user: dani)
+    assert_includes dani.achievements.pluck(:key), "cheirinho_lideranca"
+  end
+
   test "creates no hits event when nobody nails exact score" do
     ana = user(name: "Ana", email: "ana@example.com")
     bia = user(name: "Bia", email: "bia@example.com")
