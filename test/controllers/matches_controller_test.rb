@@ -197,14 +197,31 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   test "shows knockout bracket page" do
     player = user
     game = match_record(kickoff_at: 1.day.from_now)
+    third_place_game = match_record(kickoff_at: 1.day.from_now)
     game.update!(round_name: "Final", stage: "Final")
+    third_place_game.update!(round_name: "Match for 3rd place", stage: "Match for 3rd place")
+    game.home_team.update!(code: "BSD-463")
+    game.away_team.update!(code: "BSD-464")
+    third_place_game.home_team.update!(code: "BSD-465")
+    third_place_game.away_team.update!(code: "BSD-466")
 
     post session_path, params: { email: player.email, password: "secret123" }
     get bracket_matches_path
 
     assert_response :success
     assert_includes response.body, "Chaveamento"
+    assert_includes response.body, "cup-bracket"
+    assert_includes response.body, "cup-final-column"
     assert_includes response.body, "Final"
+    assert_includes response.body, "cup-third-place"
+    assert_includes response.body, "Disputa de 3o lugar"
+    assert_operator response.body.index("Final"), :<, response.body.index("Disputa de 3o lugar")
+    assert_includes response.body, "quick-prediction-modal"
+    assert_includes response.body, "data-modal-open"
+    assert_includes response.body, "palpite rapido"
+    assert_includes response.body, "bracket-team-logo-image"
+    assert_not_includes response.body, "Toque para palpitar"
+    assert_not_includes response.body, "Revelados"
   end
 
   test "shows groups page with fallback when standings are empty" do

@@ -15,14 +15,14 @@ module Football
       "Quartas",
       "Semifinais",
       "Final",
-      "3o lugar",
-      "Mata-mata"
+      "3o lugar"
     ].freeze
 
     ROUND_SORT = ROUND_ORDER.each_with_index.to_h.freeze
 
     def self.round_label(raw_label)
-      ROUND_LABELS.fetch(raw_label.to_s, raw_label.to_s.presence || "Mata-mata")
+      label = raw_label.to_s
+      ROUND_LABELS[label] || (ROUND_ORDER.include?(label) ? label : nil)
     end
 
     def initialize(matches)
@@ -45,7 +45,12 @@ module Football
     def grouped
       @grouped ||= matches
         .select { |match| match.group_name.blank? }
-        .group_by { |match| self.class.round_label(match.round_name.presence || match.stage) }
+        .each_with_object(Hash.new { |groups, label| groups[label] = [] }) do |match, groups|
+          label = self.class.round_label(match.round_name.presence || match.stage)
+          next if label.blank?
+
+          groups[label] << match
+        end
     end
   end
 end

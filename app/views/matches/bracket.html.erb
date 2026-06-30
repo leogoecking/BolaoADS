@@ -1,52 +1,100 @@
 <div class="actions">
   <div>
-    <p class="page-kicker">Mata-mata</p>
-    <h1 class="page-title">🗂️ Chaveamento</h1>
+    <p class="page-kicker">Chave da Copa</p>
+    <h1 class="page-title">Chaveamento</h1>
   </div>
   <%= link_to "Ver calendario", calendar_matches_path, class: "button-secondary" %>
 </div>
 
 <% if @bracket_rounds.any? %>
-  <div class="bracket-board">
-    <% @bracket_rounds.each do |round| %>
-      <section class="bracket-round">
-        <div class="section-heading">
-          <div>
-            <p class="page-kicker">fase</p>
-            <h2><%= round.fetch(:label) %></h2>
+  <% final_round = @bracket_rounds.find { |round| round.fetch(:label) == "Final" } %>
+  <% third_place_round = @bracket_rounds.find { |round| round.fetch(:label) == "3o lugar" } %>
+  <% knockout_rounds = @bracket_rounds.reject { |round| ["Final", "3o lugar"].include?(round.fetch(:label)) } %>
+
+  <% left_rounds = knockout_rounds.map do |round|
+    matches = round.fetch(:matches)
+    { label: round.fetch(:label), matches: matches.first((matches.size / 2.0).ceil) }
+  end.reject { |round| round.fetch(:matches).empty? } %>
+
+  <% right_rounds = knockout_rounds.reverse.map do |round|
+    matches = round.fetch(:matches)
+    { label: round.fetch(:label), matches: matches.drop((matches.size / 2.0).ceil) }
+  end.reject { |round| round.fetch(:matches).empty? } %>
+
+  <div class="cup-bracket" aria-label="Chaveamento da Copa">
+    <div class="cup-bracket-side cup-bracket-left">
+      <% left_rounds.each_with_index do |round, index| %>
+        <section class="cup-bracket-column" style="--round-depth: <%= index %>">
+          <div class="cup-bracket-heading">
+            <span><%= round.fetch(:label) %></span>
+            <small><%= round.fetch(:matches).size %></small>
           </div>
-          <span class="count-pill"><%= round.fetch(:matches).size %></span>
+
+          <div class="cup-bracket-match-list">
+            <% round.fetch(:matches).each do |match| %>
+              <%= render "bracket_match", match: match, prediction: @predictions_by_match_id[match.id], return_to: request.fullpath, variant: "bracket-match-compact" %>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+
+    <section class="cup-bracket-center">
+      <div class="cup-final-column">
+        <div class="cup-bracket-heading cup-final-heading">
+          <span>Final</span>
+          <small>titulo</small>
         </div>
 
-        <div class="bracket-match-list">
-          <% round.fetch(:matches).each do |match| %>
-            <% prediction = @predictions_by_match_id[match.id] %>
-            <%= link_to match_path(match), class: "bracket-match" do %>
-              <div class="activity-meta">
-                <span><%= l(match.kickoff_at, format: :short) %></span>
-                <% if match.venue.present? %>
-                  <span><%= [match.venue.name, match.venue.city].compact.join(" - ") %></span>
-                <% end %>
-              </div>
-              <div class="bracket-teams">
-                <span><%= match.home_team.name %></span>
-                <strong><%= match.score_label %></strong>
-                <span><%= match.away_team.name %></span>
-              </div>
-              <% if prediction.present? %>
-                <p class="muted">Seu palpite: <%= prediction.home_score %> x <%= prediction.away_score %></p>
-              <% elsif match.open_for_predictions? %>
-                <p class="muted">Aberto para palpite</p>
-              <% end %>
+        <div class="cup-final-card">
+          <% if final_round.present? %>
+            <% final_round.fetch(:matches).each do |match| %>
+              <%= render "bracket_match", match: match, prediction: @predictions_by_match_id[match.id], return_to: request.fullpath, variant: "bracket-match-final" %>
             <% end %>
+          <% else %>
+            <div class="panel-muted">
+              <p class="font-black text-slate-900">Final ainda nao definida.</p>
+            </div>
           <% end %>
         </div>
-      </section>
-    <% end %>
+      </div>
+
+      <% if third_place_round.present? %>
+        <aside class="cup-third-place">
+          <div class="cup-bracket-heading">
+            <span>Disputa de 3o lugar</span>
+            <small>extra</small>
+          </div>
+
+          <div class="cup-bracket-match-list">
+            <% third_place_round.fetch(:matches).each do |match| %>
+              <%= render "bracket_match", match: match, prediction: @predictions_by_match_id[match.id], return_to: request.fullpath, variant: "bracket-match-secondary bracket-match-compact" %>
+            <% end %>
+          </div>
+        </aside>
+      <% end %>
+    </section>
+
+    <div class="cup-bracket-side cup-bracket-right">
+      <% right_rounds.each_with_index do |round, index| %>
+        <section class="cup-bracket-column" style="--round-depth: <%= index %>">
+          <div class="cup-bracket-heading">
+            <span><%= round.fetch(:label) %></span>
+            <small><%= round.fetch(:matches).size %></small>
+          </div>
+
+          <div class="cup-bracket-match-list">
+            <% round.fetch(:matches).each do |match| %>
+              <%= render "bracket_match", match: match, prediction: @predictions_by_match_id[match.id], return_to: request.fullpath, variant: "bracket-match-compact" %>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
   </div>
 <% else %>
   <div class="panel-muted">
-    <p class="font-black text-slate-900">🗂️ Chaveamento indisponivel.</p>
-    <p class="muted">Sincronize os jogos para carregar as fases de mata-mata.</p>
+    <p class="font-black text-slate-900">Chaveamento indisponivel.</p>
+    <p class="muted">Sincronize os jogos para carregar as fases eliminatorias.</p>
   </div>
 <% end %>

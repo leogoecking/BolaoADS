@@ -1,0 +1,45 @@
+<% prediction = local_assigns[:prediction] %>
+<% return_to = local_assigns.fetch(:return_to, request.fullpath) %>
+<% card_class = ["bracket-match", local_assigns[:variant]].compact.join(" ") %>
+
+<% bracket_card = capture do %>
+  <div class="bracket-match-topline">
+    <span><%= l(match.kickoff_at, format: :short) %></span>
+  </div>
+
+  <div class="bracket-team-row">
+    <% home_logo_url = team_logo_url(match.home_team) %>
+    <div class="bracket-team">
+      <span class="bracket-team-logo-frame">
+        <%= image_tag home_logo_url, class: "bracket-team-logo-image", alt: "", onerror: "this.hidden=true;this.nextElementSibling.hidden=false" if home_logo_url %>
+        <span class="bracket-team-logo-fallback" <%= "hidden" if home_logo_url %>><%= team_initials(match.home_team) %></span>
+      </span>
+      <strong><%= match.home_team.name %></strong>
+    </div>
+    <span class="bracket-score"><%= match.home_score.nil? ? "-" : match.home_score %></span>
+  </div>
+
+  <div class="bracket-team-row">
+    <% away_logo_url = team_logo_url(match.away_team) %>
+    <div class="bracket-team">
+      <span class="bracket-team-logo-frame">
+        <%= image_tag away_logo_url, class: "bracket-team-logo-image", alt: "", onerror: "this.hidden=true;this.nextElementSibling.hidden=false" if away_logo_url %>
+        <span class="bracket-team-logo-fallback" <%= "hidden" if away_logo_url %>><%= team_initials(match.away_team) %></span>
+      </span>
+      <strong><%= match.away_team.name %></strong>
+    </div>
+    <span class="bracket-score"><%= match.away_score.nil? ? "-" : match.away_score %></span>
+  </div>
+
+<% end %>
+
+<% if match.open_for_predictions? %>
+  <button type="button" class="<%= card_class %> bracket-match-button" data-modal-open="quick-prediction-modal-<%= match.id %>">
+    <%= bracket_card %>
+  </button>
+  <%= render "quick_prediction_modal", match: match, prediction: prediction, return_to: return_to %>
+<% else %>
+  <%= link_to match_path(match), class: card_class do %>
+    <%= bracket_card %>
+  <% end %>
+<% end %>
